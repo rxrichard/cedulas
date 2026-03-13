@@ -3,111 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Museu Numismático Interativo - Acervo Digital</title>
-    <style>
-        :root { --primary: #1a3a5a; --bg: #f8f9fa; --accent: #28a745; --gold: #c5a059; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; overflow-x: hidden; }
-        
-        /* HEADER */
-        header { background: white; border-bottom: 3px solid var(--primary); padding: 20px; text-align: center; }
-        header h1 { color: var(--primary); margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
-
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .section-header { background: var(--primary); color: white; padding: 12px 20px; margin: 40px 0 20px; border-radius: 4px; text-transform: uppercase; font-weight: bold; font-size: 14px; }
-        
-        /* GRID DE CÉDULAS */
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; }
-        .note-card { background: white; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.3s; }
-        .note-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: var(--gold); }
-        .img-wrapper { height: 140px; display: flex; align-items: center; justify-content: center; padding: 15px; background: #fff; }
-        .img-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .card-info { padding: 15px; text-align: center; border-top: 1px solid #eee; background: #fafafa; }
-        .card-info b { font-size: 15px; color: var(--primary); display: block; }
-        .card-info span { font-size: 11px; color: #777; font-family: monospace; display: block; margin-top: 5px; }
-
-        /* MODAL INTERATIVO (Girar a Nota e Navegar) */
-        .modal { display: none; position: fixed; z-index: 1000; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; overflow-y: auto; padding: 20px 0; }
-        .modal.open { display: flex; }
-        .modal-content { width: 95%; max-width: 900px; position: relative; display: flex; flex-direction: column; gap: 15px; margin: auto; }
-        
-        /* FICHA TÉCNICA (DESTAQUE NO TOPO) */
-        .modal-header-info { text-align: center; background: white; padding: 20px; border-radius: 8px; border-top: 5px solid var(--gold); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .modal-header-info h2 { margin: 0 0 15px 0; color: var(--primary); text-transform: uppercase; font-size: 22px; }
-        .badges { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-        .badge { background: #f1f4f7; padding: 8px 15px; border-radius: 20px; font-size: 14px; color: #555; border: 1px solid #ddd; }
-        .badge b { color: var(--primary); font-family: monospace; font-size: 16px; margin-left: 5px; }
-
-        /* ÁREA DA CÉDULA */
-        .flipper-container { position: relative; width: 100%; margin: 10px 0; }
-        .card-flipper {
-            position: relative; width: 100%; height: 380px;
-            transition: transform 0.6s ease-in-out;
-            transform-style: preserve-3d;
-        }
-        .card-flipper.flipped { transform: rotateY(180deg); }
-
-        .note-face {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; display: flex; align-items: center; justify-content: center;
-            background: radial-gradient(circle, #222 0%, #000 100%);
-            border-radius: 12px; border: 1px solid #444; overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
-        }
-        .note-face img { width: 85%; filter: drop-shadow(0 5px 25px rgba(0,0,0,0.5)); cursor: zoom-in; }
-        .face-back { transform: rotateY(180deg); }
-
-        /* CONTROLES DO MODAL (Botão Flip centralizado na nota) */
-        .modal-controls { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); z-index: 10; }
-        .control-btn {
-            width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--gold);
-            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; background: #1a1a1a;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
-        }
-        .control-btn:hover { background: var(--gold); transform: scale(1.1); }
-        .control-btn svg { width: 30px; height: 30px; fill: var(--gold); transition: 0.3s; }
-        .control-btn:hover svg { fill: black; }
-
-        /* BOTÕES DE NAVEGAÇÃO (< e >) */
-        .nav-btn {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            background: rgba(26, 58, 90, 0.9); color: white; border: 2px solid var(--gold);
-            font-size: 24px; padding: 15px 20px; cursor: pointer; border-radius: 8px;
-            z-index: 100; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        .nav-btn:hover { background: var(--gold); color: black; }
-        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; border-color: #555; background: #222; }
-        .prev-btn { left: -10px; }
-        .next-btn { right: -10px; }
-        @media (min-width: 1100px) { .prev-btn { left: -80px; } .next-btn { right: -80px; } }
-
-        .zoom-hint { text-align: center; color: #aaa; font-size: 12px; margin-top: 25px; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* PAINEL DA HISTÓRIA */
-        .info-panel { background: white; padding: 20px; border-radius: 8px; border-left: 5px solid var(--gold); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .info-panel p { margin: 5px 0; font-size: 14px; line-height: 1.6; color: #444; }
-        .curiosity-tag { display: inline-block; background: #fdf6e3; color: #856404; padding: 6px 12px; border-radius: 4px; font-weight: bold; margin-top: 15px; font-size: 13px; border: 1px dashed #ffe58f; }
-
-        /* SUPER ZOOM (MODAL 2) */
-        #superZoom { display: none; position: fixed; z-index: 2000; top:0; left:0; width:100%; height:100%; background: #000; cursor: zoom-out; flex-direction: column; align-items: center; justify-content: center; }
-        #superZoom.open { display: flex; }
-        #zoomWrapper { width: 95vw; height: 85vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        #zoomImg { max-width: 100%; max-height: 100%; transition: transform 0.1s; transform-origin: center; cursor: crosshair; }
-        
-        .close-modal { position: absolute; top: -15px; right: -15px; background: #e74c3c; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; cursor: pointer; border: none; z-index: 2100; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.2s; }
-        .close-modal:hover { background: #c0392b; transform: scale(1.1); }
-        
-        @media (max-width: 768px) {
-            .card-flipper { height: 220px; }
-            .nav-btn { padding: 10px 15px; font-size: 18px; top: auto; bottom: -80px; transform: none; }
-            .prev-btn { left: 10%; }
-            .next-btn { right: 10%; }
-        }
-    </style>
+    <title>Coleção Numismático Richard Bastos - Acervo Digital</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <header>
-    <h1>CASA DAS CÉDULAS - ACERVO DIGITAL</h1>
+    <h1>COLEÇÃO NUMISMÁTICA RICHARD BASTOS</h1>
+    <div class="header-subtitle">Acervo Digital Oficial</div>
+    
+    <div class="tabs-container">
+        <button class="tab-btn active" id="tab-cedulas" onclick="mudarAba('CEDULAS')">Cédulas</button>
+        <button class="tab-btn" id="tab-moedas" onclick="mudarAba('MOEDAS')">Moedas</button>
+    </div>
+
+    <div class="filters-container">
+        <button class="filter-btn active" id="filter-todos" onclick="mudarFiltro('TODOS')">Todos</button>
+        <button class="filter-btn" id="filter-troca" onclick="mudarFiltro('TROCA')">Para Troca</button>
+        <button class="filter-btn" id="filter-acervo" onclick="mudarFiltro('ACERVO')">Acervo Pessoal</button>
+    </div>
 </header>
 
 <div class="container" id="main-container"></div>
@@ -117,16 +31,17 @@
         <button class="close-modal" onclick="fecharTudo()" title="Fechar (ESC)">&times;</button>
         
         <div class="modal-header-info">
-            <h2 id="infoTitle">Nome da Cédula</h2>
+            <h2 id="infoTitle">Nome do Item</h2>
             <div class="badges">
+                <span class="badge" id="modalStatusBadge"></span>
                 <span class="badge">Valor Facial:<b id="specValor"></b></span>
-                <span class="badge">Número de Série:<b id="specSerial"></b></span>
+                <span class="badge">Série/Ano:<b id="specSerial"></b></span>
             </div>
         </div>
 
         <div class="flipper-container">
-            <button class="nav-btn prev-btn" id="btnPrev" onclick="navegar(-1)" title="Cédula Anterior">&#10094;</button>
-            <button class="nav-btn next-btn" id="btnNext" onclick="navegar(1)" title="Próxima Cédula">&#10095;</button>
+            <button class="nav-btn prev-btn" id="btnPrev" onclick="navegar(-1)" title="Item Anterior">&#10094;</button>
+            <button class="nav-btn next-btn" id="btnNext" onclick="navegar(1)" title="Próximo Item">&#10095;</button>
 
             <div class="card-flipper" id="flipper">
                 <div class="note-face face-front">
@@ -138,21 +53,24 @@
             </div>
 
             <div class="modal-controls">
-                <div class="control-btn" onclick="toggleFlip()" title="Girar Cédula">
+                <div class="control-btn" onclick="toggleFlip()" title="Girar Item">
                     <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
                 </div>
             </div>
         </div>
 
-        <div class="zoom-hint">
-            🔍 Clique na imagem da cédula para abrir o SUPER ZOOM
-        </div>
+        <div class="zoom-hint">🔍 Clique na imagem para abrir o SUPER ZOOM</div>
 
         <div class="info-panel">
             <p id="infoDesc"></p>
             <div class="curiosity-tag">💡 <span id="infoCuriosity"></span></div>
+            
+            <div id="wa-btn-container" style="margin-top: 20px; text-align: center; display: none;">
+                <a id="wa-btn" href="#" target="_blank" class="wa-button">
+                    💬 Tenho interesse nesta troca! (WhatsApp)
+                </a>
+            </div>
         </div>
-
     </div>
 </div>
 
@@ -166,246 +84,9 @@
     </div>
 </div>
 
-<script>
+<script src="image-list.js"></script>
+<script src="descricoes-notas.js"></script>
+<script src="script.js"></script>
 
-    
-    const listaDeArquivosUrl = [
-        "https://i.ibb.co/398Y7n0b/1-CRUZEIRO-B16412-031062-BACK.jpg",
-        "https://i.ibb.co/HTt6jCjg/1-CRUZEIRO-B16412-031062-FRONT.jpg",
-        "https://i.ibb.co/HTJFk4jP/1-CRUZEIRO-B17043-083053-BACK.jpg",
-        "https://i.ibb.co/p6kmYNZY/1-CRUZEIRO-B17043-083053-FRONT.jpg",
-        "https://i.ibb.co/vxMNKVQJ/1-CRUZEIRO-B16640-030866-BACK.jpg",
-        "https://i.ibb.co/7B6hH7C/1-CRUZEIRO-B16640-030866-FRONT.jpg",
-        "https://i.ibb.co/tT1Cfqz7/2-CRUZEIROS-069263-BACK.jpg",
-        "https://i.ibb.co/L7qdxpz/2-CRUZEIROS-069263-FRONT.jpg",
-        "https://i.ibb.co/Z67HWR54/2-CRUZEIROS-072674-BACK.jpg",
-        "https://i.ibb.co/HfZmdgHC/2-CRUZEIROS-072674-FRONT.jpg",
-        "https://i.ibb.co/Z67HWR54/2-CRUZEIROS-072674-BACK.jpg",
-        "https://i.ibb.co/HfZmdgHC/2-CRUZEIROS-072674-FRONT.jpg",
-        "https://i.ibb.co/ymNF3gvT/5-CRUZEIROS-B05147-017309-BACK.jpg",
-        "https://i.ibb.co/RG3K3GyH/5-CRUZEIROS-B05147-017309-FRONT.jpg",
-        "https://i.ibb.co/GvDTx0Kp/10-CRUZEIROS-066100-BACK.jpg",
-        "https://i.ibb.co/8vMSPjD/10-CRUZEIROS-066100-FRONT.jpg",
-        "https://i.ibb.co/LDY2BFxb/10-CRUZEIROS-087595-BACK.jpg",
-        "https://i.ibb.co/1p1bCkb/10-CRUZEIROS-087595-FRONT.jpg",
-    ];
-    // ==================================================================================
-
-
-    // BANCO DE DADOS HISTÓRICOS E CURIOSIDADES POR CÉDULA ESPECÍFICA
-    const bancoHistorico = {
-        "1-CRUZEIRO": { hist: "Cédula clássica. O Cruzeiro de 1942 foi a primeira grande unificação da nossa moeda, substituindo o Réis. Representou a modernização do Brasil durante a Era Vargas.", cur: "As primeiras emissões eram frequentemente encomendadas no exterior (EUA ou Inglaterra) por falta de tecnologia local." },
-        "2-CRUZEIROS": { hist: "Comum na metade do século XX, homenageou figuras militares e heróis nacionais como o Duque de Caxias.", cur: "Com o avanço rápido da inflação nas décadas de 60 e 70, notas de valores tão baixos deixaram de circular." },
-        "5-CRUZEIROS": { hist: "Nota de altíssima circulação nas décadas passadas. O Barão do Rio Branco foi uma das presenças mais constantes nesta cédula.", cur: "Era a nota mais famosa para pequenos trocos no comércio cotidiano do brasileiro." },
-        "10-CRUZEIROS": { hist: "Representou uma fase de intenso desenvolvimento econômico. Muitas traziam estampadas as figuras de Getúlio Vargas ou de D. Pedro II.", cur: "A mudança de coloração destas notas ao longo das séries ajudava os caixas a identificarem falsificações." },
-        "20-CRUZEIROS": { hist: "Famosa por homenagear o Marechal Deodoro da Fonseca, proclamador da República do Brasil.", cur: "O reverso desta cédula apresenta uma bela gravura em relevo (talho-doce) valorizando a arte nacional." },
-        "50-CRUZADOS": { hist: "Lançada com o Plano Cruzado em 1986. A versão em Cruzado enalteceu o poeta Carlos Drummond de Andrade.", cur: "O poema 'Canção Amiga' aparece impresso em microletras na cédula." },
-        "100-CRUZADOS": { hist: "Cédula emblemática que homenageia Juscelino Kubitschek, o 'presidente Bossa Nova', e a construção de Brasília.", cur: "Foi lançada no auge do congelamento de preços e dos 'fiscais do Sarney' nos supermercados." },
-        "100-CRUZEIROS": { hist: "Uma das cédulas mais tradicionais. Ao longo das décadas, homenageou D. Pedro II e, mais tarde, a escritora Cecília Meireles.", cur: "Sofreu diversas adaptações de tamanho e elementos de segurança em seus anos de uso." },
-        "200-CRUZADOS": { hist: "Nota da era do Plano Cruzado. Marcada por um design mais arrojado e geométrico, apresentava a Efígie da República.", cur: "Representa o início da transição para os modelos mais coloridos da nossa moeda contemporânea." },
-        "200-CRUZEIROS": { hist: "Em edições antigas, trazia a Princesa Isabel; nas séries dos anos 90, a Efígie da República. Reflete a volatilidade econômica do período.", cur: "Teve um tempo de circulação relativamente curto devido às trocas frenéticas de padrão monetário." },
-        "500-CRUZADOS": { hist: "Lançada com o Cruzado, homenageia Heitor Villa-Lobos, o grande maestro e compositor brasileiro.", cur: "Foi uma das primeiras a introduzir temas não apenas políticos, mas fortemente culturais em seu verso e anverso." },
-        "500-CRUZADOS-NOVOS": { hist: "Homenageia o biólogo Augusto Ruschi. O Cruzado Novo (1989) cortou três zeros da moeda anterior.", cur: "Destaque para a rica ilustração de orquídeas e beija-flores, enaltecendo a biodiversidade do país." },
-        "500-CRUZEIROS": { hist: "Apresentou D. João VI em suas primeiras impressões, e posteriormente o escritor Machado de Assis.", cur: "O valor '500' sempre representou momentos onde a inflação começava a forçar impressões de alto valor facial." },
-        "1000-CRUZADOS": { hist: "Outra belíssima cédula literária. Trazia a figura de Machado de Assis e elementos alusivos ao Rio de Janeiro de sua época.", cur: "No seu verso, pode-se notar o emblema da Academia Brasileira de Letras." },
-        "1000-CRUZEIROS": { hist: "Historicamente, exibiu o Barão do Rio Branco e, nos anos 90, o Marechal Cândido Rondon.", cur: "A nota do Barão é um dos maiores símbolos clássicos do 'Cruzeiro Velho'." },
-        "5000-CRUZADOS": { hist: "Lançada com a efígie do célebre pintor Candido Portinari. Demonstrava a excelência do design da Casa da Moeda.", cur: "Apresenta trechos da magistral obra 'Tiradentes' pintada por Portinari no reverso." },
-        "5000-CRUZEIROS": { hist: "Homenageou Tiradentes (série clássica) e o maestro Carlos Gomes nas edições dos anos 90.", cur: "Uma das cédulas mais populares e desgastadas pelo uso diário na hiperinflação." },
-        "10000-CRUZADOS": { hist: "Nota em homenagem ao brilhante cientista Carlos Chagas.", cur: "Contém microimpressões alusivas ao seu trabalho no laboratório e à descoberta da doença que leva seu nome." },
-        "10000-CRUZEIROS": { hist: "Trazia o médico e sanitarista Vital Brazil, fundador do Instituto Butantan.", cur: "O verso apresenta uma incrível gravura da extração de veneno de serpentes, um marco da ciência nacional." },
-        "50000-CRUZADOS": { hist: "Apresentava Câmara Cascudo, o maior folclorista do Brasil.", cur: "Lançada rapidamente, sofreu carimbos para a transição para Cruzados Novos pouco tempo depois." },
-        "50000-CRUZEIROS": { hist: "Novamente estampando Câmara Cascudo, desta vez sob o padrão Cruzeiro dos anos 90.", cur: "O verso apresenta a rica cena folclórica do Bumba-meu-boi, valorizando a cultura nordestina." },
-        "100000-CRUZEIROS": { hist: "A icônica 'Nota do Beija-Flor'. Representava o ápice da perda do poder de compra do Cruzeiro em 1992.", cur: "O desenho ecológico fez tanto sucesso que a Casa da Moeda o reaproveitou nas famosas notas de 1 Real." },
-        "500000-CRUZEIROS": { hist: "A cédula de maior valor facial de toda a história do Brasil! Estampou o escritor Mário de Andrade.", cur: "Simboliza o momento mais crítico da hiperinflação brasileira, meses antes da estabilização pelo Plano Real em 1994." },
-        "DEFAULT_CRUZEIRO": { hist: "O Cruzeiro é a moeda que mais tempo acompanhou a história do Brasil republicano, enfrentando diversas reformas e planos econômicos.", cur: "Sua produção marcou o aprimoramento da Casa da Moeda do Brasil na tecnologia de segurança (calcografia)." },
-        "DEFAULT_CRUZADO": { hist: "Criado na década de 1980 para tentar travar a inflação exorbitante com o corte sistemático de zeros das antigas cédulas.", cur: "A pressa das reformas monetárias exigiu o uso generalizado de 'carimbos' sobre notas já impressas." }
-    };
-
-    const pasta = ''; // Pasta vazia pois usaremos URLs completas
-    let escalaZoom = 1;
-    let notasGlobais = [];
-    let notaAtualIndex = 0;
-
-    function montarGaleria() {
-        const container = document.getElementById('main-container');
-        
-        // 1. Mapear e Extrair Dados Inteligentes das URLs
-        const frentes = listaDeArquivosUrl.filter(url => url.includes('-FRONT.jpg')).map(url => {
-            // Extrai o nome do arquivo da URL completa
-            const filename = url.substring(url.lastIndexOf('/') + 1);
-            
-            let valor = filename.split('-')[0];
-            let moeda = "CRUZEIROS"; 
-            let era = "CRUZEIRO";
-            let chaveHistoria = "";
-            
-            if (filename.includes("CRUZADOS-NOVOS")) {
-                moeda = "CRUZADOS NOVOS";
-                era = "CRUZADOS NOVOS";
-                chaveHistoria = `${valor}-CRUZADOS-NOVOS`;
-            } else if (filename.includes("CRUZADOS")) {
-                moeda = "CRUZADOS";
-                era = "CRUZADO";
-                chaveHistoria = `${valor}-CRUZADOS`;
-            } else if (filename.includes("CRUZEIRO")) {
-                moeda = filename.includes("CRUZEIROS") ? "CRUZEIROS" : "CRUZEIRO";
-                era = "CRUZEIRO";
-                chaveHistoria = `${valor}-CRUZEIRO${filename.includes("CRUZEIROS") ? 'S' : ''}`;
-            }
-
-            // Lógica para extrair a SÉRIE limpando o prefixo conhecido
-            let prefixoLimpo = `${valor}-${moeda.replace(' ', '-')}-`;
-            if(filename.includes('CRUZEIROS-A')) prefixoLimpo = `${valor}-CRUZEIROS-`;
-            if(filename.includes('CRUZEIRO-B')) prefixoLimpo = `${valor}-CRUZEIRO-`;
-            
-            let serialOriginal = filename.replace(prefixoLimpo, '').replace('-FRONT.jpg', '');
-
-            // Encontra a URL do verso correspondente na lista principal
-            const filenameBackExpected = filename.replace('-FRONT.jpg', '-BACK.jpg');
-            const urlBackFound = listaDeArquivosUrl.find(u => u.endsWith(filenameBackExpected));
-
-            return { 
-                urlFront: url,
-                urlBack: urlBackFound,
-                valorNum: parseInt(valor),
-                valorExibicao: valor,
-                moeda: moeda, 
-                era: era,
-                serial: serialOriginal,
-                chaveHistoria: chaveHistoria
-            };
-        });
-
-        // 2. Agrupar e Renderizar por Era
-        const ordemEras = ["CRUZEIRO", "CRUZADO", "CRUZADOS NOVOS"];
-        
-        ordemEras.forEach(era => {
-            const notas = frentes.filter(n => n.era === era).sort((a,b) => a.valorNum - b.valorNum);
-            if(notas.length === 0) return;
-            
-            const h = document.createElement('div'); 
-            h.className = 'section-header'; 
-            h.innerText = `ALA DOS ${era}S`; 
-            container.appendChild(h);
-            
-            const grid = document.createElement('div'); 
-            grid.className = 'gallery-grid';
-            
-            notas.forEach(n => {
-                notasGlobais.push(n);
-                const currentIndex = notasGlobais.length - 1;
-
-                const card = document.createElement('div'); 
-                card.className = 'note-card';
-                card.innerHTML = `
-                    <div class="img-wrapper"><img src="${n.urlFront}" loading="lazy"></div>
-                    <div class="card-info">
-                        <b>${n.valorExibicao} ${n.moeda}</b>
-                        <span>SÉRIE: ${n.serial}</span>
-                    </div>
-                `;
-                card.onclick = () => abrirModalInterativo(currentIndex);
-                grid.appendChild(card);
-            });
-            container.appendChild(grid);
-        });
-    }
-
-    // ABRIR MODAL
-    function abrirModalInterativo(index) {
-        notaAtualIndex = index;
-        const n = notasGlobais[index];
-
-        // Setar Imagens usando as URLs diretas
-        document.getElementById('imgFront').src = n.urlFront;
-        // Se não achar o verso, usa a frente como tapa-buraco para não quebrar
-        document.getElementById('imgBack').src = n.urlBack || n.urlFront; 
-
-        // Preencher Ficha Técnica
-        document.getElementById('infoTitle').innerText = `${n.valorExibicao} ${n.moeda}`;
-        document.getElementById('specValor').innerText = `${n.valorExibicao} ${n.moeda}`;
-        document.getElementById('specSerial').innerText = n.serial;
-
-        // Buscar História Específica ou Genérica
-        let dadosHist = bancoHistorico[n.chaveHistoria];
-        if (!dadosHist && n.chaveHistoria.endsWith('S')) {
-             dadosHist = bancoHistorico[n.chaveHistoria.slice(0, -1)];
-        }
-        if (!dadosHist) {
-            dadosHist = (n.era === "CRUZADO" || n.era === "CRUZADOS NOVOS") ? bancoHistorico["DEFAULT_CRUZADO"] : bancoHistorico["DEFAULT_CRUZEIRO"];
-        }
-        
-        document.getElementById('infoDesc').innerText = dadosHist.hist;
-        document.getElementById('infoCuriosity').innerText = dadosHist.cur;
-
-        // Resetar flip e botões
-        document.getElementById('flipper').classList.remove('flipped');
-        document.getElementById('btnPrev').disabled = (index === 0);
-        document.getElementById('btnNext').disabled = (index === notasGlobais.length - 1);
-
-        document.getElementById('modalInterativo').classList.add('open');
-        document.body.style.overflow = 'hidden';
-    }
-
-    // NAVEGAÇÃO (< >)
-    function navegar(direcao) {
-        const novoIndex = notaAtualIndex + direcao;
-        if (novoIndex >= 0 && novoIndex < notasGlobais.length) {
-            abrirModalInterativo(novoIndex);
-        }
-    }
-
-    // GIRAR
-    function toggleFlip() {
-        document.getElementById('flipper').classList.toggle('flipped');
-    }
-
-    // SUPER ZOOM (1x a 4x)
-    function abrirSuperZoom(src) {
-        document.getElementById('zoomImg').src = src;
-        escalaZoom = 1; 
-        document.getElementById('zoomImg').style.transform = `scale(1)`;
-        document.getElementById('superZoom').classList.add('open');
-    }
-
-    function controlarScrollZoom(e) {
-        e.preventDefault();
-        escalaZoom = e.deltaY < 0 ? Math.min(4, escalaZoom + 0.2) : Math.max(1, escalaZoom - 0.2);
-        document.getElementById('zoomImg').style.transform = `scale(${escalaZoom})`;
-    }
-
-    function atualizarPosicaoZoom(e) {
-        const i = e.target;
-        i.style.transformOrigin = `${(e.offsetX/i.offsetWidth)*100}% ${(e.offsetY/i.offsetHeight)*100}%`;
-    }
-
-    // FECHAMENTO CASCATA (ESC)
-    function fecharModal(id) {
-        document.getElementById(id).classList.remove('open');
-        if(id === 'modalInterativo') document.body.style.overflow = '';
-    }
-
-    function fecharTudo() {
-        fecharModal('superZoom');
-        fecharModal('modalInterativo');
-        document.getElementById('flipper').classList.remove('flipped');
-    }
-
-    document.addEventListener('keydown', (e) => {
-        if(e.key === "Escape") {
-            if(document.getElementById('superZoom').classList.contains('open')) fecharModal('superZoom');
-            else fecharTudo();
-        }
-        
-        // Navegar setas se zoom estiver fechado
-        if(!document.getElementById('superZoom').classList.contains('open') && document.getElementById('modalInterativo').classList.contains('open')) {
-            if(e.key === "ArrowLeft") navegar(-1);
-            if(e.key === "ArrowRight") navegar(1);
-        }
-    });
-
-    // Iniciar
-    montarGaleria();
-</script>
 </body>
 </html>
