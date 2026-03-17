@@ -286,7 +286,15 @@ header h1 {
     box-shadow: 0 15px 35px rgba(0,0,0,0.8); 
 }
 
-.note-face img { width: 85%; filter: drop-shadow(0 5px 25px rgba(0,0,0,0.5)); cursor: zoom-in; }
+.note-face img { 
+    max-width: 85%; 
+    max-height: 85%; 
+    width: auto;
+    height: auto;
+    object-fit: contain; 
+    filter: drop-shadow(0 5px 25px rgba(0,0,0,0.5)); 
+    cursor: zoom-in; 
+}
 .face-back { transform: rotateY(180deg); }
 
 /* CONTROLES */
@@ -442,4 +450,22 @@ header h1 {
 /* Classe que esconde o grid */
 .gallery-grid.collapsed {
     display: none;
+}
+/* ========================================================= */
+/* BADGE DE QUANTIDADE (MOEDAS REPETIDAS)                    */
+/* ========================================================= */
+.qtd-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--primary);
+    color: white;
+    font-weight: 800;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    z-index: 6;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    border: 2px solid var(--gold);
+    letter-spacing: 0.5px;
 }

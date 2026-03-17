@@ -2,26 +2,23 @@ let escalaZoom = 1;
 let notasGlobais = [];
 let notaAtualIndex = 0;
 let abaAtivaAtual = 'CEDULAS'; 
-let filtroStatusAtual = 'TODOS'; // NOVO: Variável do filtro
+let filtroStatusAtual = 'TODOS'; 
 
 // ==========================================
-// FUNÇÕES DE NAVEGAÇÃO DE ABAS E FILTROS
+// FUNÇÕES DE NAVEGAÇÃO
 // ==========================================
 function mudarAba(tipo) {
     abaAtivaAtual = tipo;
-    
     document.getElementById('tab-cedulas').classList.remove('active');
     document.getElementById('tab-moedas').classList.remove('active');
     
     if(tipo === 'CEDULAS') document.getElementById('tab-cedulas').classList.add('active');
     else document.getElementById('tab-moedas').classList.add('active');
-
     montarGaleria();
 }
 
 function mudarFiltro(status) {
     filtroStatusAtual = status;
-    
     document.getElementById('filter-todos').classList.remove('active');
     document.getElementById('filter-troca').classList.remove('active');
     document.getElementById('filter-acervo').classList.remove('active');
@@ -29,7 +26,6 @@ function mudarFiltro(status) {
     if(status === 'TODOS') document.getElementById('filter-todos').classList.add('active');
     else if(status === 'TROCA') document.getElementById('filter-troca').classList.add('active');
     else if(status === 'ACERVO') document.getElementById('filter-acervo').classList.add('active');
-
     montarGaleria();
 }
 
@@ -42,49 +38,98 @@ function montarGaleria() {
     notasGlobais = []; 
     
     if (typeof listaDeArquivosUrl === 'undefined' || listaDeArquivosUrl.length === 0) {
-        container.innerHTML = "<h3 style='color:red; text-align:center;'>Nenhuma imagem encontrada no arquivo lista-imagens.js.</h3>";
+        container.innerHTML = "<h3 style='color:red; text-align:center;'>Nenhuma imagem encontrada.</h3>";
         return;
     }
 
-    // 1. Processa todos os links da lista
-    const itensProcessados = listaDeArquivosUrl.filter(item => item.includes('-FRONT.jpg')).map(item => {
-        let statusAtual = "TROCA"; // Padrão
+    const itensProcessados = listaDeArquivosUrl.filter(item => item.includes('-FRONT')).map(item => {
+        let statusAtual = "TROCA"; 
+        let qtd = 1; 
         let url = item;
+        let detalheManual = "";
 
         if (item.includes('|')) {
             let partes = item.split('|');
-            statusAtual = partes[0].trim().toUpperCase(); 
-            url = partes[1].trim(); 
+            let configText = partes[0].trim().toUpperCase(); 
+            
+            if (configText.includes('-')) {
+                let configPartes = configText.split('-');
+                statusAtual = configPartes[0].trim();
+                qtd = parseInt(configPartes[1].trim()) || 1;
+            } else {
+                statusAtual = configText;
+            }
+
+            if (partes.length >= 3) {
+                detalheManual = partes[1].trim();
+                url = partes[2].trim();
+            } else {
+                url = partes[1].trim(); 
+            }
         }
 
         const filename = url.substring(url.lastIndexOf('/') + 1);
-        let valor = filename.split('-')[0];
+        let baseFilename = filename.split('-FRONT')[0]; 
+        
+        let valor = baseFilename.split('-')[0];
         let moeda = "CRUZEIROS"; 
         let era = "CRUZEIRO";
         let chaveHistoria = "";
+        let isEstrang = false;
         
-        let tipoItem = filename.includes("-MOEDA-") ? "MOEDAS" : "CEDULAS";
-        
-        if (filename.includes("CRUZADOS-NOVOS")) {
+        let tipoItem = baseFilename.includes("-MOEDA-") ? "MOEDAS" : "CEDULAS";
+        let serialOriginal = baseFilename;
+
+        if (baseFilename.includes("-ESTRANGEIRA-")) {
+            isEstrang = true;
+            let partes = baseFilename.split('-ESTRANGEIRA-'); 
+            let partesEsq = partes[0].split('-'); 
+            moeda = partesEsq[1]; 
+
+            let partesDir = partes[1].split('-'); 
+            era = partesDir[0].toUpperCase().replace(/_/g, ' '); 
+            chaveHistoria = `${valor}-${moeda}-${era.replace(/ /g, '_')}`; 
+            
+            let prefixoLimpo = `${partes[0]}-ESTRANGEIRA-${partesDir[0]}-`;
+            serialOriginal = baseFilename.replace(prefixoLimpo, '');
+            if (!serialOriginal || serialOriginal === baseFilename) serialOriginal = "S/N";
+
+        } 
+        else if (baseFilename.includes("CRUZEIROS-REAIS") || baseFilename.includes("CRUZEIRO-REAL")) {
+            moeda = baseFilename.includes("CRUZEIROS") ? "CRUZEIROS REAIS" : "CRUZEIRO REAL"; 
+            era = "CRUZEIRO REAL"; 
+            chaveHistoria = `${valor}-${moeda.replace(' ', '-')}`;
+        }
+        else if (baseFilename.includes("CRUZADOS-NOVOS")) {
             moeda = "CRUZADOS NOVOS"; era = "CRUZADOS NOVOS"; chaveHistoria = `${valor}-CRUZADOS-NOVOS`;
-        } else if (filename.includes("CRUZADOS")) {
+        } else if (baseFilename.includes("CRUZADOS")) {
             moeda = "CRUZADOS"; era = "CRUZADO"; chaveHistoria = `${valor}-CRUZADOS`;
-        } else if (filename.includes("CRUZEIRO")) {
-            moeda = filename.includes("CRUZEIROS") ? "CRUZEIROS" : "CRUZEIRO"; era = "CRUZEIRO"; chaveHistoria = `${valor}-CRUZEIRO${filename.includes("CRUZEIROS") ? 'S' : ''}`;
+        } else if (baseFilename.includes("CRUZEIRO")) {
+            moeda = baseFilename.includes("CRUZEIROS") ? "CRUZEIROS" : "CRUZEIRO"; era = "CRUZEIRO"; chaveHistoria = `${valor}-CRUZEIRO${baseFilename.includes("CRUZEIROS") ? 'S' : ''}`;
         }
 
-        let prefixoLimpo = `${valor}-${moeda.replace(' ', '-')}-`;
-        if(filename.includes('CRUZEIROS-A')) prefixoLimpo = `${valor}-CRUZEIROS-`;
-        if(filename.includes('CRUZEIRO-B')) prefixoLimpo = `${valor}-CRUZEIRO-`;
-        if(tipoItem === "MOEDAS") prefixoLimpo = `${valor}-${moeda.replace(' ', '-')}-MOEDA-`; 
-        
-        let serialOriginal = filename.replace(prefixoLimpo, '').replace('-FRONT.jpg', '');
+        if (!isEstrang) {
+            let prefixoLimpo = `${valor}-${moeda.replace(' ', '-')}-`;
+            if(baseFilename.includes('CRUZEIROS-A')) prefixoLimpo = `${valor}-CRUZEIROS-`;
+            if(baseFilename.includes('CRUZEIRO-B')) prefixoLimpo = `${valor}-CRUZEIRO-`;
+            if(tipoItem === "MOEDAS") prefixoLimpo = `${valor}-${moeda.replace(' ', '-')}-MOEDA-`; 
+            serialOriginal = baseFilename.replace(prefixoLimpo, '');
+        }
 
-        const filenameBackExpected = filename.replace('-FRONT.jpg', '-BACK.jpg');
-        let itemBackFound = listaDeArquivosUrl.find(u => u.includes(filenameBackExpected));
+        // CORREÇÃO: JUNTA A SÉRIE DO LINK COM O ANO/TEXTO MANUAL
+        if (detalheManual !== "") {
+            if (serialOriginal !== "" && serialOriginal !== "S/N") {
+                serialOriginal = `${serialOriginal} / ${detalheManual}`;
+            } else {
+                serialOriginal = detalheManual;
+            }
+        }
+
+        let itemBackFound = listaDeArquivosUrl.find(u => u.includes(baseFilename + '-BACK'));
         let urlBackFound = itemBackFound;
         if (itemBackFound && itemBackFound.includes('|')) {
-            urlBackFound = itemBackFound.split('|')[1].trim();
+            let partesVerso = itemBackFound.split('|');
+            urlBackFound = partesVerso[partesVerso.length - 1].trim();
         }
 
         return { 
@@ -97,11 +142,12 @@ function montarGaleria() {
             serial: serialOriginal, 
             chaveHistoria: chaveHistoria,
             tipo: tipoItem,
-            status: statusAtual
+            status: statusAtual,
+            isEstrang: isEstrang,
+            qtd: qtd 
         };
     });
 
-    // 2. FILTRO DUPLO (Aba selecionada + Status de Troca/Acervo)
     const itensParaExibir = itensProcessados.filter(item => {
         let condicaoAba = item.tipo === abaAtivaAtual;
         let condicaoStatus = filtroStatusAtual === 'TODOS' ? true : item.status === filtroStatusAtual;
@@ -109,30 +155,35 @@ function montarGaleria() {
     });
 
     if (itensParaExibir.length === 0) {
-        let textoAviso = filtroStatusAtual === 'TODOS' ? abaAtivaAtual.toLowerCase() : `notas de ${filtroStatusAtual.toLowerCase()}`;
-        container.innerHTML = `<h3 style='color:#777; text-align:center; margin-top: 50px;'>Nenhuma correspondência encontrada para essa categoria.</h3>`;
+        container.innerHTML = `<h3 style='color:#777; text-align:center; margin-top: 50px;'>Nenhuma correspondência encontrada.</h3>`;
         return;
     }
 
-    const ordemEras = ["CRUZEIRO", "CRUZADO", "CRUZADOS NOVOS"];
+    const erasNacionais = ["CRUZEIRO", "CRUZADO", "CRUZADOS NOVOS", "CRUZEIRO REAL"];
+    const erasEstrangeiras = [...new Set(itensParaExibir.filter(n => n.isEstrang).map(n => n.era))].sort();
+    const ordemEras = [...erasNacionais, ...erasEstrangeiras];
     
-    // No final da função montarGaleria, dentro do ordemEras.forEach...
     ordemEras.forEach(era => {
         const itensDaEra = itensParaExibir.filter(n => n.era === era).sort((a,b) => a.valorNum - b.valorNum);
         if(itensDaEra.length === 0) return;
         
-        // Criação do Cabeçalho
         const h = document.createElement('div'); 
-        h.className = 'section-header'; 
+        h.className = 'section-header collapsed'; 
         
-        let nomeExibicaoEra = (era === "CRUZADOS NOVOS") ? "CRUZADOS NOVOS" : era + "S";
-        h.innerText = `ALA DOS ${nomeExibicaoEra}`; 
+        let isEstaEraEstrangeira = erasEstrangeiras.includes(era);
+        if (isEstaEraEstrangeira) {
+            h.innerText = `ALA INTERNACIONAL - ${era}`; 
+        } else if (era === "CRUZADOS NOVOS") {
+            h.innerText = "ALA DOS CRUZADOS NOVOS";
+        } else if (era === "CRUZEIRO REAL") {
+            h.innerText = "ALA DOS CRUZEIROS REAIS";
+        } else {
+            h.innerText = `ALA DOS ${era}S`;
+        }
         
-        // Criação do Grid
         const grid = document.createElement('div'); 
-        grid.className = 'gallery-grid';
+        grid.className = 'gallery-grid collapsed'; 
         
-        // Lógica de recolher ao clicar
         h.onclick = () => {
             h.classList.toggle('collapsed');
             grid.classList.toggle('collapsed');
@@ -147,16 +198,19 @@ function montarGaleria() {
             let classeCarimbo = n.status === "ACERVO" ? "stamp-acervo" : "stamp-troca";
             let textoCarimbo = n.status === "ACERVO" ? "ACERVO PESSOAL" : "P/ TROCA";
 
-            const card = document.createElement('div'); 
-            card.className = 'note-card';
+            let badgeQtd = n.qtd > 1 ? `<div class="qtd-badge">${n.qtd} UNID.</div>` : '';
+
+            const card = document.createElement('div'); card.className = 'note-card';
+            
             card.innerHTML = `
                 <div class="img-wrapper">
                     <div class="stamp-overlay ${classeCarimbo}">${textoCarimbo}</div>
+                    ${badgeQtd}
                     <img src="${n.urlFront}" loading="lazy" onload="this.classList.add('loaded')">
                 </div>
                 <div class="card-info">
                     <b>${n.valorExibicao} ${n.moeda}</b>
-                    <span>SÉRIE/ANO: ${n.serial}</span>
+                    <span>DETALHES: ${n.serial}</span>
                 </div>
             `;
             card.onclick = () => abrirModalInterativo(currentIndex);
@@ -185,24 +239,33 @@ function abrirModalInterativo(index) {
     const waContainer = document.getElementById('wa-btn-container');
     const waBtn = document.getElementById('wa-btn');
 
+    let qtdTextoModal = n.qtd > 1 ? `<span style="background:var(--gold); color:white; padding:3px 8px; border-radius:12px; font-size:12px; margin-left:10px; box-shadow:0 2px 4px rgba(0,0,0,0.2);">${n.qtd} UNID.</span>` : '';
+
     if (n.status === "TROCA") {
-        badgeStatus.innerHTML = "<b style='color: #28a745; margin:0;'>P/ TROCA</b>";
+        badgeStatus.innerHTML = `<b style='color: #28a745; margin:0;'>P/ TROCA</b> ${qtdTextoModal}`;
         badgeStatus.style.borderColor = "#28a745";
         
         if (waContainer) waContainer.style.display = "block";
-        const numeroWhatsApp = "5511999999999"; // <-- COLOQUE SEU NÚMERO AQUI
-        const mensagem = encodeURIComponent(`Olá Richard! Vi no seu Acervo Digital a cédula de ${n.valorExibicao} ${n.moeda} (Série: ${n.serial}) e tenho interesse em negociar uma troca!`);
+        const numeroWhatsApp = "5511999999999"; 
+        
+        let textoQtdWa = n.qtd > 1 ? ` (Vi que você tem ${n.qtd} unidades disponíveis)` : '';
+        const mensagem = encodeURIComponent(`Olá Richard! Vi no seu Acervo Digital o item de ${n.valorExibicao} ${n.moeda} (${n.isEstrang ? n.era : 'Detalhes: '+n.serial}) e tenho interesse em negociar uma troca!${textoQtdWa}`);
         if (waBtn) waBtn.href = `https://wa.me/${numeroWhatsApp}?text=${mensagem}`;
     } else {
-        badgeStatus.innerHTML = "<b style='color: #dc3545; margin:0;'>ACERVO PESSOAL</b>";
+        badgeStatus.innerHTML = `<b style='color: #dc3545; margin:0;'>ACERVO PESSOAL</b> ${qtdTextoModal}`;
         badgeStatus.style.borderColor = "#dc3545";
-        
         if (waContainer) waContainer.style.display = "none";
     }
 
     let dadosHist = typeof bancoHistorico !== 'undefined' ? bancoHistorico[n.chaveHistoria] : null;
     if (!dadosHist && n.chaveHistoria.endsWith('S')) dadosHist = bancoHistorico[n.chaveHistoria.slice(0, -1)];
-    if (!dadosHist) dadosHist = (n.era === "CRUZADO" || n.era === "CRUZADOS NOVOS") ? bancoHistorico["DEFAULT_CRUZADO"] : bancoHistorico["DEFAULT_CRUZEIRO"];
+    
+    if (!dadosHist) {
+        if (n.isEstrang) dadosHist = bancoHistorico["DEFAULT_ESTRANGEIRA"];
+        else if (n.era === "CRUZEIRO REAL") dadosHist = bancoHistorico["DEFAULT_CRUZEIRO_REAL"];
+        else if (n.era === "CRUZADO" || n.era === "CRUZADOS NOVOS") dadosHist = bancoHistorico["DEFAULT_CRUZADO"];
+        else dadosHist = bancoHistorico["DEFAULT_CRUZEIRO"];
+    }
     
     document.getElementById('infoDesc').innerText = dadosHist ? dadosHist.hist : "Descrição indisponível.";
     document.getElementById('infoCuriosity').innerText = dadosHist ? dadosHist.cur : "";
@@ -252,7 +315,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Inicia com a Aba Cédulas e o Filtro Todos
 window.onload = () => {
     mudarFiltro('TODOS');
 };
