@@ -47,37 +47,49 @@ function montarGaleria() {
         let qtd = 1; 
         let url = item;
         let detalheManual = "";
+        let configText = "";
 
+        // SEPARA AS PARTES ANTES DE ANALISAR
         if (item.includes('|')) {
             let partes = item.split('|');
-            let configText = partes[0].trim().toUpperCase(); 
-            
-            if (configText.includes('-')) {
-                let configPartes = configText.split('-');
-                statusAtual = configPartes[0].trim();
-                qtd = parseInt(configPartes[1].trim()) || 1;
-            } else {
-                statusAtual = configText;
-            }
-
             if (partes.length >= 3) {
+                configText = partes[0].trim().toUpperCase();
                 detalheManual = partes[1].trim();
                 url = partes[2].trim();
             } else {
-                url = partes[1].trim(); 
+                configText = partes[0].trim().toUpperCase();
+                url = partes[1].trim();
             }
         }
 
         const filename = url.substring(url.lastIndexOf('/') + 1);
         let baseFilename = filename.split('-FRONT')[0]; 
+        let tipoItem = baseFilename.includes("-MOEDA-") ? "MOEDAS" : "CEDULAS";
         
+        // LEITOR INTELIGENTE DE STATUS, QTD E ANO
+        if (configText) {
+            if (configText.includes('-')) {
+                let configPartes = configText.split('-');
+                statusAtual = configPartes[0].trim();
+                let valorAposTraco = configPartes[1].trim();
+                
+                if (tipoItem === "MOEDAS") {
+                    qtd = parseInt(valorAposTraco) || 1;
+                } else {
+                    // SE FOR CÉDULA, NUNCA TEM QUANTIDADE. SALVA O TRAÇO COMO ANO/SÉRIE.
+                    qtd = 1;
+                    if (detalheManual === "") detalheManual = valorAposTraco;
+                }
+            } else {
+                statusAtual = configText;
+            }
+        }
+
         let valor = baseFilename.split('-')[0];
         let moeda = "CRUZEIROS"; 
         let era = "CRUZEIRO";
         let chaveHistoria = "";
         let isEstrang = false;
-        
-        let tipoItem = baseFilename.includes("-MOEDA-") ? "MOEDAS" : "CEDULAS";
         let serialOriginal = baseFilename;
 
         if (baseFilename.includes("-ESTRANGEIRA-")) {
@@ -116,7 +128,7 @@ function montarGaleria() {
             serialOriginal = baseFilename.replace(prefixoLimpo, '');
         }
 
-        // CORREÇÃO: JUNTA A SÉRIE DO LINK COM O ANO/TEXTO MANUAL
+        // JUNTA A SÉRIE DO LINK COM O ANO/TEXTO MANUAL
         if (detalheManual !== "") {
             if (serialOriginal !== "" && serialOriginal !== "S/N") {
                 serialOriginal = `${serialOriginal} / ${detalheManual}`;
@@ -196,9 +208,10 @@ function montarGaleria() {
             const currentIndex = notasGlobais.length - 1;
             
             let classeCarimbo = n.status === "ACERVO" ? "stamp-acervo" : "stamp-troca";
-            let textoCarimbo = n.status === "ACERVO" ? "ACERVO PESSOAL" : "P/ TROCA";
+            let textoCarimbo = n.status === "ACERVO" ? "ACERVO" : "P/ TROCA";
 
-            let badgeQtd = n.qtd > 1 ? `<div class="qtd-badge">${n.qtd} UNID.</div>` : '';
+            // A ETIQUETA SÓ APARECE SE TIVER > 1 UNIDADE E SE FOR MOEDA
+            let badgeQtd = (n.qtd > 1 && n.tipo === "MOEDAS") ? `<div class="qtd-badge">${n.qtd} UNID.</div>` : '';
 
             const card = document.createElement('div'); card.className = 'note-card';
             
@@ -239,7 +252,7 @@ function abrirModalInterativo(index) {
     const waContainer = document.getElementById('wa-btn-container');
     const waBtn = document.getElementById('wa-btn');
 
-    let qtdTextoModal = n.qtd > 1 ? `<span style="background:var(--gold); color:white; padding:3px 8px; border-radius:12px; font-size:12px; margin-left:10px; box-shadow:0 2px 4px rgba(0,0,0,0.2);">${n.qtd} UNID.</span>` : '';
+    let qtdTextoModal = (n.qtd > 1 && n.tipo === "MOEDAS") ? `<span style="background:var(--gold); color:white; padding:3px 8px; border-radius:12px; font-size:12px; margin-left:10px; box-shadow:0 2px 4px rgba(0,0,0,0.2);">${n.qtd} UNID.</span>` : '';
 
     if (n.status === "TROCA") {
         badgeStatus.innerHTML = `<b style='color: #28a745; margin:0;'>P/ TROCA</b> ${qtdTextoModal}`;
@@ -248,7 +261,7 @@ function abrirModalInterativo(index) {
         if (waContainer) waContainer.style.display = "block";
         const numeroWhatsApp = "5511999999999"; 
         
-        let textoQtdWa = n.qtd > 1 ? ` (Vi que você tem ${n.qtd} unidades disponíveis)` : '';
+        let textoQtdWa = (n.qtd > 1 && n.tipo === "MOEDAS") ? ` (Vi que você tem ${n.qtd} unidades disponíveis)` : '';
         const mensagem = encodeURIComponent(`Olá Richard! Vi no seu Acervo Digital o item de ${n.valorExibicao} ${n.moeda} (${n.isEstrang ? n.era : 'Detalhes: '+n.serial}) e tenho interesse em negociar uma troca!${textoQtdWa}`);
         if (waBtn) waBtn.href = `https://wa.me/${numeroWhatsApp}?text=${mensagem}`;
     } else {
