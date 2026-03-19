@@ -8,19 +8,23 @@
 </head>
 <body>
 
-<header>
-    <h1>COLEÇÃO NUMISMÁTICA RICHARD BASTOS</h1>
-    <div class="header-subtitle">Acervo Digital Oficial</div>
+<header id="main-header">
+    <h1 id="site-title">GALERIA DE MOEDAS E CÉDULAS</h1>
     
-    <div class="tabs-container">
-        <button class="tab-btn active" id="tab-cedulas" onclick="mudarAba('CEDULAS')">Cédulas</button>
-        <button class="tab-btn" id="tab-moedas" onclick="mudarAba('MOEDAS')">Moedas</button>
-    </div>
-
-    <div class="filters-container">
-        <button class="filter-btn active" id="filter-todos" onclick="mudarFiltro('TODOS')">Todos</button>
-        <button class="filter-btn" id="filter-troca" onclick="mudarFiltro('TROCA')">Para Troca</button>
-        <button class="filter-btn" id="filter-acervo" onclick="mudarFiltro('ACERVO')">Acervo Pessoal</button>
+    <div class="burger-btn" onclick="toggleMenu()">☰</div>
+    
+    <div class="header-subtitle">COLEÇÃO NUMISMÁTICA - RICHARD BASTOS</div>
+    
+    <div class="nav-menu" id="navMenu">
+        <div class="tabs-container">
+            <button class="tab-btn active" id="tab-cedulas" onclick="mudarAba('CEDULAS')">Cédulas</button>
+            <button class="tab-btn" id="tab-moedas" onclick="mudarAba('MOEDAS')">Moedas</button>
+        </div>
+        <div class="filters-container">
+            <button class="filter-btn active" id="filter-todos" onclick="mudarFiltro('TODOS')">Todas as Peças</button>
+            <button class="filter-btn" id="filter-troca" onclick="mudarFiltro('TROCA')">Para Troca</button>
+            <button class="filter-btn" id="filter-acervo" onclick="mudarFiltro('ACERVO')">Acervo Pessoal</button>
+        </div>
     </div>
 </header>
 
@@ -65,9 +69,9 @@
             <p id="infoDesc"></p>
             <div class="curiosity-tag">💡 <span id="infoCuriosity"></span></div>
             
-            <div id="wa-btn-container" style="margin-top: 20px; text-align: center; display: none;">
+            <div id="wa-btn-container" class="wa-btn-wrapper">
                 <a id="wa-btn" href="#" target="_blank" class="wa-button">
-                    💬 Tenho interesse nesta troca! (WhatsApp)
+                    💬 Tenho interesse nesta troca!
                 </a>
             </div>
         </div>
@@ -75,11 +79,11 @@
 </div>
 
 <div id="superZoom">
-    <button class="close-modal" onclick="fecharModal('superZoom')" style="top: 20px; right: 30px;">&times;</button>
+    <button class="close-modal" onclick="fecharModal('superZoom')">&times;</button>
     <div id="zoomWrapper">
         <img id="zoomImg" src="" onmousemove="atualizarPosicaoZoom(event)" onwheel="controlarScrollZoom(event)">
     </div>
-    <div style="color: var(--gold); margin-top: 10px; font-family: monospace; text-transform: uppercase;">
+    <div class="zoom-instructions">
         Scroll do Mouse: Zoom (1x - 4x) • Mover o Mouse: Navegar
     </div>
 </div>
