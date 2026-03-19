@@ -978,3 +978,97 @@ header.shrink.menu-open .filters-container {
     .note-face img { max-width: calc(100% - 16px); max-height: calc(100% - 16px); }
     .modal-content { width: 96%; }
 }
+
+/* ========================================================= */
+/* RESPONSIVIDADE (MOBILE OTIMIZADO - CARA DE APLICATIVO)    */
+/* ========================================================= */
+@media (max-width: 768px) {
+    /* 1. Ajuste do espaço superior e do cabeçalho */
+    body { padding-top: 150px; } 
+    
+    header { 
+        padding: 20px 15px; 
+        text-align: left; /* Joga o texto pra esquerda pra sobrar espaço pro menu */
+    }
+    
+    header h1 { 
+        font-size: 20px; 
+        max-width: 80%; /* Evita que o texto encoste no botão hambúrguer */
+        margin-bottom: 5px; 
+        line-height: 1.2;
+    }
+    
+    .header-subtitle { 
+        font-size: 10px; 
+        max-width: 80%; 
+        margin-bottom: 0; 
+        letter-spacing: 2px; 
+    }
+    
+    /* 2. Menu Hambúrguer SEMPRE visível no celular */
+    .burger-btn { 
+        display: block; 
+        top: 25px; /* Alinhamento inicial */
+        right: 15px; 
+        transform: none; 
+    }
+    
+    /* Esconde a barra de navegação inline por padrão */
+    .nav-menu { display: none; }
+    
+    /* 3. A Gaveta do Menu Aberta (Ocupando a tela toda) */
+    header.menu-open .nav-menu, header.shrink.menu-open .nav-menu {
+        display: flex; 
+        flex-direction: column; 
+        position: absolute;
+        top: 100%; left: 0; width: 100%; 
+        background: var(--primary);
+        border-bottom: 4px solid var(--gold); 
+        box-shadow: 0 15px 30px rgba(0,0,0,0.8);
+        padding: 15px 20px; 
+        box-sizing: border-box;
+    }
+
+    /* 4. Botões empilhados e largos (Fáceis de tocar) */
+    .tabs-container { 
+        display: flex; flex-direction: column; width: 100%; 
+        border: none; padding: 0; background: transparent; 
+        box-shadow: none; margin-bottom: 10px; 
+    }
+    .tab-btn { 
+        width: 100%; margin-bottom: 8px; padding: 14px; 
+        font-size: 14px; border-radius: 4px; box-sizing: border-box;
+    }
+    
+    .filters-container { 
+        display: flex; flex-direction: column; width: 100%; 
+        border-top: 1px dashed rgba(212, 175, 55, 0.3); padding-top: 15px; 
+    }
+    .filter-btn { 
+        width: 100%; margin-bottom: 8px; padding: 14px; 
+        font-size: 13px; border-radius: 4px; box-sizing: border-box;
+    }
+
+    /* 5. Comportamento ao Rolar (Shrink) no Mobile */
+    header.shrink { padding: 15px; }
+    header.shrink h1 { font-size: 18px; margin: 0; }
+    header.shrink .burger-btn { top: 50%; transform: translateY(-50%); }
+
+    /* 6. Ajustes da Galeria e Modal para Telas Pequenas */
+    .section-header { font-size: 15px; margin: 30px 0 20px 0; padding: 12px 15px; letter-spacing: 2px; }
+    .section-header::before { font-size: 20px; margin-right: 10px; }
+    
+    .card-flipper { height: 280px; }
+    .nav-btn { padding: 10px 15px; font-size: 18px; top: auto; bottom: -70px; transform: none; }
+    .prev-btn { left: 10%; }
+    .next-btn { right: 10%; }
+    
+    .modal-content { width: 95%; margin-top: 15px; }
+    .modal-header-info { padding: 15px; }
+    .modal-header-info h2 { font-size: 20px; }
+    .badges { gap: 8px; }
+    .badge { padding: 6px 12px; font-size: 11px; }
+    .badge b { font-size: 13px; }
+    
+    .wa-button { width: 100%; box-sizing: border-box; font-size: 13px; padding: 15px; }
+}

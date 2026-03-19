@@ -5,17 +5,21 @@ let abaAtivaAtual = 'CEDULAS';
 let filtroStatusAtual = 'TODOS'; 
 
 // ==========================================
+// IMAGEM DE SEGURANÇA (FALLBACK SE DER ERRO)
+// ==========================================
+// Uma imagem elegante nas cores do seu museu caso a foto original falhe
+const imagemErroPlaceholder = "https://placehold.co/600x300/0A2E1A/D4AF37?text=Imagem+Indisponivel";
+
+// ==========================================
 // DETECTOR DE SCROLL E MENU HAMBÚRGUER
 // ==========================================
 window.addEventListener('scroll', () => {
     const header = document.querySelector('header');
-    
-    // O cabeçalho encolhe depois de descer 80 pixels
-    if (window.scrollY > 10) {
+    if (window.scrollY > 80) {
         header.classList.add('shrink');
     } else {
         header.classList.remove('shrink');
-        header.classList.remove('menu-open'); // Se subir tudo, fecha a gaveta
+        header.classList.remove('menu-open'); 
     }
 
     const btnTopo = document.getElementById('btnTopo');
@@ -25,16 +29,8 @@ window.addEventListener('scroll', () => {
     }
 });
 
-// Abre e fecha a gaveta do menu quando o hambúrguer é clicado
-function toggleMenu() {
-    document.querySelector('header').classList.toggle('menu-open');
-}
-
-// Fecha o menu automaticamente quando uma opção é escolhida
-function fecharMenuMobile() {
-    const header = document.querySelector('header');
-    if(header) header.classList.remove('menu-open');
-}
+function toggleMenu() { document.querySelector('header').classList.toggle('menu-open'); }
+function fecharMenuMobile() { const header = document.querySelector('header'); if(header) header.classList.remove('menu-open'); }
 
 // ==========================================
 // TRADUTOR DE NÚMEROS PARA EXTENSO
@@ -55,11 +51,7 @@ function numeroParaExtenso(num) {
         if (c > 0) res.push(centenas[c]);
         if (d > 0) {
             if (d < 20) res.push(unidades[d]);
-            else {
-                res.push(dezenas[Math.floor(d / 10)]);
-                let u = d % 10;
-                if (u > 0) res.push(unidades[u]);
-            }
+            else { res.push(dezenas[Math.floor(d / 10)]); let u = d % 10; if (u > 0) res.push(unidades[u]); }
         }
         return res.join(" E ");
     }
@@ -74,13 +66,8 @@ function numeroParaExtenso(num) {
     }
     if (resto > 0) {
         let textoResto = converteMenor1000(resto);
-        if (milhares > 0 && (resto < 100 || resto % 100 === 0)) {
-            partes.push("E " + textoResto);
-        } else if (milhares > 0) {
-            partes.push(textoResto);
-        } else {
-            partes.push(textoResto);
-        }
+        if (milhares > 0 && (resto < 100 || resto % 100 === 0)) partes.push("E " + textoResto);
+        else partes.push(textoResto);
     }
     return partes.join(" ");
 }
@@ -95,8 +82,7 @@ function mudarAba(tipo) {
     
     if(tipo === 'CEDULAS') document.getElementById('tab-cedulas').classList.add('active');
     else document.getElementById('tab-moedas').classList.add('active');
-    montarGaleria();
-    fecharMenuMobile(); 
+    montarGaleria(); fecharMenuMobile(); 
 }
 
 function mudarFiltro(status) {
@@ -108,13 +94,10 @@ function mudarFiltro(status) {
     if(status === 'TODOS') document.getElementById('filter-todos').classList.add('active');
     else if(status === 'TROCA') document.getElementById('filter-troca').classList.add('active');
     else if(status === 'ACERVO') document.getElementById('filter-acervo').classList.add('active');
-    montarGaleria();
-    fecharMenuMobile(); 
+    montarGaleria(); fecharMenuMobile(); 
 }
 
-function irParaTopo() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+function irParaTopo() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
 function recolherTodasAsAlas() {
     const headers = document.querySelectorAll('.section-header');
@@ -126,27 +109,17 @@ function recolherTodasAsAlas() {
 
 function injetarBotoesFlutuantes() {
     if (document.getElementById('floating-actions')) return; 
-
-    const div = document.createElement('div');
-    div.id = 'floating-actions';
-    div.className = 'floating-actions';
-
+    const div = document.createElement('div'); div.id = 'floating-actions'; div.className = 'floating-actions';
+    
     const btnRecolher = document.createElement('button');
-    btnRecolher.className = 'float-btn';
-    btnRecolher.innerHTML = '🗂️'; 
-    btnRecolher.title = "Minimizar todas as Alas";
-    btnRecolher.onclick = recolherTodasAsAlas;
+    btnRecolher.className = 'float-btn'; btnRecolher.innerHTML = '🗂️'; 
+    btnRecolher.title = "Minimizar todas as Alas"; btnRecolher.onclick = recolherTodasAsAlas;
 
     const btnTopo = document.createElement('button');
-    btnTopo.className = 'float-btn hide'; 
-    btnTopo.id = 'btnTopo';
-    btnTopo.innerHTML = '▲';
-    btnTopo.title = "Voltar ao Topo";
-    btnTopo.onclick = irParaTopo;
+    btnTopo.className = 'float-btn hide'; btnTopo.id = 'btnTopo'; btnTopo.innerHTML = '▲';
+    btnTopo.title = "Voltar ao Topo"; btnTopo.onclick = irParaTopo;
 
-    div.appendChild(btnRecolher);
-    div.appendChild(btnTopo);
-    document.body.appendChild(div);
+    div.appendChild(btnRecolher); div.appendChild(btnTopo); document.body.appendChild(div);
 }
 
 // ==========================================
@@ -154,86 +127,56 @@ function injetarBotoesFlutuantes() {
 // ==========================================
 function montarGaleria() {
     const container = document.getElementById('main-container');
-    container.innerHTML = ''; 
-    notasGlobais = []; 
+    container.innerHTML = ''; notasGlobais = []; 
     
     if (typeof listaDeArquivosUrl === 'undefined' || listaDeArquivosUrl.length === 0) {
-        container.innerHTML = "<h3 style='color:red; text-align:center;'>Nenhuma imagem encontrada.</h3>";
+        container.innerHTML = "<h3 style='color:red; text-align:center;'>Nenhuma imagem encontrada no acervo.</h3>";
         return;
     }
 
     const itensProcessados = listaDeArquivosUrl.filter(item => item.includes('-FRONT')).map(item => {
         let url = item.includes('|') ? item.split('|').pop().trim() : item.trim();
-        
         const filename = url.substring(url.lastIndexOf('/') + 1);
         let baseFilename = filename.split('-FRONT')[0]; 
         let tipoItem = baseFilename.includes("-MOEDA-") ? "MOEDAS" : "CEDULAS";
         
-        let statusAtual = "TROCA"; 
-        let qtd = 1; 
-        let detalheManual = "";
+        let statusAtual = "TROCA"; let qtd = 1; let detalheManual = "";
 
         if (item.includes('|')) {
-            let partes = item.split('|').map(p => p.trim());
-            partes.pop(); 
-            
+            let partes = item.split('|').map(p => p.trim()); partes.pop(); 
             let primeiraParte = partes[0].toUpperCase();
             
             if (primeiraParte.startsWith("ACERVO") || primeiraParte.startsWith("TROCA")) {
                 statusAtual = primeiraParte.startsWith("ACERVO") ? "ACERVO" : "TROCA";
-                
                 if (primeiraParte.includes('-')) {
                     let valorAposTraco = primeiraParte.split('-')[1].trim();
-                    if (tipoItem === "MOEDAS") {
-                        qtd = parseInt(valorAposTraco) || 1;
-                    } else {
-                        detalheManual = valorAposTraco; 
-                    }
+                    if (tipoItem === "MOEDAS") qtd = parseInt(valorAposTraco) || 1;
+                    else detalheManual = valorAposTraco; 
                 }
-                
-                if (partes.length > 1) {
-                    if (detalheManual !== "") {
-                        detalheManual = detalheManual + " / " + partes[1];
-                    } else {
-                        detalheManual = partes[1];
-                    }
-                }
-            } else {
-                detalheManual = partes[0];
-            }
+                if (partes.length > 1) detalheManual = detalheManual !== "" ? detalheManual + " / " + partes[1] : partes[1];
+            } else { detalheManual = partes[0]; }
         }
 
         let valor = baseFilename.split('-')[0];
-        let moeda = "CRUZEIROS"; 
-        let era = "CRUZEIRO";
-        let chaveHistoria = "";
-        let isEstrang = false;
-        let serialOriginal = baseFilename;
+        let moeda = "CRUZEIROS"; let era = "CRUZEIRO"; let chaveHistoria = ""; let isEstrang = false; let serialOriginal = baseFilename;
 
         if (baseFilename.includes("-ESTRANGEIRA-")) {
             isEstrang = true;
             let partes = baseFilename.split('-ESTRANGEIRA-'); 
-            let partesEsq = partes[0].split('-'); 
-            moeda = partesEsq[1]; 
-
-            let partesDir = partes[1].split('-'); 
-            era = partesDir[0].toUpperCase().replace(/_/g, ' '); 
+            let partesEsq = partes[0].split('-'); moeda = partesEsq[1]; 
+            let partesDir = partes[1].split('-'); era = partesDir[0].toUpperCase().replace(/_/g, ' '); 
             chaveHistoria = `${valor}-${moeda}-${era.replace(/ /g, '_')}`; 
-            
             let prefixoLimpo = `${partes[0]}-ESTRANGEIRA-${partesDir[0]}-`;
             serialOriginal = baseFilename.replace(prefixoLimpo, '');
             if (!serialOriginal || serialOriginal === baseFilename) serialOriginal = "S/N";
-
         } 
         else if (baseFilename.includes("CRUZEIROS-REAIS") || baseFilename.includes("CRUZEIRO-REAL")) {
             moeda = baseFilename.includes("CRUZEIROS") ? "CRUZEIROS REAIS" : "CRUZEIRO REAL"; 
-            era = "CRUZEIRO REAL"; 
-            chaveHistoria = `${valor}-${moeda.replace(' ', '-')}`;
+            era = "CRUZEIRO REAL"; chaveHistoria = `${valor}-${moeda.replace(' ', '-')}`;
         }
         else if (baseFilename.includes("-REAIS") || baseFilename.includes("-REAL")) {
             moeda = baseFilename.includes("REAIS") ? "REAIS" : "REAL"; 
-            era = "REAL"; 
-            chaveHistoria = `${valor}-${moeda}`;
+            era = "REAL"; chaveHistoria = `${valor}-${moeda}`;
         }
         else if (baseFilename.includes("CRUZADOS-NOVOS")) {
             moeda = "CRUZADOS NOVOS"; era = "CRUZADOS NOVOS"; chaveHistoria = `${valor}-CRUZADOS-NOVOS`;
@@ -251,36 +194,17 @@ function montarGaleria() {
             serialOriginal = baseFilename.replace(prefixoLimpo, '');
         }
 
-        if (detalheManual !== "") {
-            if (serialOriginal !== "" && serialOriginal !== "S/N") {
-                serialOriginal = `${serialOriginal} / ${detalheManual}`;
-            } else {
-                serialOriginal = detalheManual;
-            }
-        }
+        if (detalheManual !== "") serialOriginal = (serialOriginal !== "" && serialOriginal !== "S/N") ? `${serialOriginal} / ${detalheManual}` : detalheManual;
 
         let itemBackFound = listaDeArquivosUrl.find(u => u.includes(baseFilename + '-BACK'));
         let urlBackFound = itemBackFound;
-        if (itemBackFound && itemBackFound.includes('|')) {
-            urlBackFound = itemBackFound.split('|').pop().trim();
-        }
-
-        let valorNumericoInt = parseInt(valor);
-        let valorEscritoPorExtenso = numeroParaExtenso(valorNumericoInt);
+        if (itemBackFound && itemBackFound.includes('|')) urlBackFound = itemBackFound.split('|').pop().trim();
 
         return { 
-            urlFront: url, 
-            urlBack: urlBackFound, 
-            valorNum: valorNumericoInt, 
-            valorExibicao: valorEscritoPorExtenso, 
-            moeda: moeda, 
-            era: era, 
-            serial: serialOriginal, 
-            chaveHistoria: chaveHistoria,
-            tipo: tipoItem,
-            status: statusAtual,
-            isEstrang: isEstrang,
-            qtd: qtd 
+            urlFront: url, urlBack: urlBackFound, 
+            valorNum: parseInt(valor), valorExibicao: numeroParaExtenso(parseInt(valor)), 
+            moeda: moeda, era: era, serial: serialOriginal, chaveHistoria: chaveHistoria,
+            tipo: tipoItem, status: statusAtual, isEstrang: isEstrang, qtd: qtd 
         };
     });
 
@@ -303,30 +227,17 @@ function montarGaleria() {
         const itensDaEra = itensParaExibir.filter(n => n.era === era).sort((a,b) => a.valorNum - b.valorNum);
         if(itensDaEra.length === 0) return;
         
-        const h = document.createElement('div'); 
-        h.className = 'section-header collapsed'; 
+        const h = document.createElement('div'); h.className = 'section-header collapsed'; 
         
-        let isEstaEraEstrangeira = erasEstrangeiras.includes(era);
-        if (isEstaEraEstrangeira) {
-            h.innerText = `ALA INTERNACIONAL - ${era}`; 
-        } else if (era === "CRUZADOS NOVOS") {
-            h.innerText = "ALA DOS CRUZADOS NOVOS";
-        } else if (era === "CRUZEIRO REAL") {
-            h.innerText = "ALA DOS CRUZEIROS REAIS";
-        } else if (era === "REAL") {
-            h.innerText = "ALA DO REAL"; 
-        } else {
-            h.innerText = `ALA DOS ${era}S`;
-        }
+        if (erasEstrangeiras.includes(era)) h.innerText = `ALA INTERNACIONAL - ${era}`; 
+        else if (era === "CRUZADOS NOVOS") h.innerText = "ALA DOS CRUZADOS NOVOS";
+        else if (era === "CRUZEIRO REAL") h.innerText = "ALA DOS CRUZEIROS REAIS";
+        else if (era === "REAL") h.innerText = "ALA DO REAL"; 
+        else h.innerText = `ALA DOS ${era}S`;
         
-        const grid = document.createElement('div'); 
-        grid.className = 'gallery-grid collapsed'; 
+        const grid = document.createElement('div'); grid.className = 'gallery-grid collapsed'; 
         
-        h.onclick = () => {
-            h.classList.toggle('collapsed');
-            grid.classList.toggle('collapsed');
-        };
-
+        h.onclick = () => { h.classList.toggle('collapsed'); grid.classList.toggle('collapsed'); };
         container.appendChild(h);
         
         itensDaEra.forEach(n => {
@@ -335,16 +246,18 @@ function montarGaleria() {
             
             let classeCarimbo = n.status === "ACERVO" ? "stamp-acervo" : "stamp-troca";
             let textoCarimbo = n.status === "ACERVO" ? "ACERVO" : "P/ TROCA";
-
             let badgeQtd = (n.qtd > 1 && n.tipo === "MOEDAS") ? `<div class="qtd-badge">${n.qtd} UNID.</div>` : '';
 
             const card = document.createElement('div'); card.className = 'note-card';
             
+            // MÁGICA AQUI: O evento onerror e loading="lazy" protegem e otimizam a imagem!
             card.innerHTML = `
                 <div class="img-wrapper">
-                    <div class="stamp-overlay ${classeCarimbo}">${textoCarimbo}</div>
+                    <div class="stamp-overlay ${classeCarimbo}"><b>${textoCarimbo}</b></div>
                     ${badgeQtd}
-                    <img src="${n.urlFront}" loading="lazy" onload="this.classList.add('loaded')">
+                    <img src="${n.urlFront}" loading="lazy" 
+                         onerror="this.onerror=null; this.src='${imagemErroPlaceholder}'; this.style.opacity=1;" 
+                         onload="this.classList.add('loaded')">
                 </div>
                 <div class="card-info">
                     <b>${n.valorExibicao} ${n.moeda}</b>
@@ -363,11 +276,21 @@ function montarGaleria() {
 // MODAL E INTERAÇÕES
 // ==========================================
 function abrirModalInterativo(index) {
-    notaAtualIndex = index;
-    const n = notasGlobais[index];
+    notaAtualIndex = index; const n = notasGlobais[index];
 
-    document.getElementById('imgFront').src = n.urlFront;
-    document.getElementById('imgBack').src = n.urlBack || n.urlFront; 
+    const imgF = document.getElementById('imgFront');
+    const imgB = document.getElementById('imgBack');
+
+    // Reseta as imagens e configura o escudo contra erros no Modal também
+    imgF.classList.remove('loaded');
+    imgF.src = n.urlFront;
+    imgF.onerror = function() { this.src = imagemErroPlaceholder; };
+    imgF.onload = function() { this.classList.add('loaded'); };
+
+    imgB.classList.remove('loaded');
+    imgB.src = n.urlBack || n.urlFront; 
+    imgB.onerror = function() { this.src = imagemErroPlaceholder; };
+    imgB.onload = function() { this.classList.add('loaded'); };
 
     document.getElementById('infoTitle').innerText = `${n.valorExibicao} ${n.moeda}`;
     document.getElementById('specValor').innerText = `${n.valorNum} ${n.moeda}`;
@@ -376,7 +299,6 @@ function abrirModalInterativo(index) {
     const badgeStatus = document.getElementById('modalStatusBadge');
     const waContainer = document.getElementById('wa-btn-container');
     const waBtn = document.getElementById('wa-btn');
-
     let qtdTextoModal = (n.qtd > 1 && n.tipo === "MOEDAS") ? `<span style="background:var(--gold); color:white; padding:3px 8px; border-radius:12px; font-size:12px; margin-left:10px; box-shadow:0 2px 4px rgba(0,0,0,0.2);">${n.qtd} UNID.</span>` : '';
 
     if (n.status === "ACERVO") {
@@ -386,7 +308,6 @@ function abrirModalInterativo(index) {
     } else {
         badgeStatus.innerHTML = `<b style='color: #28a745; margin:0;'>P/ TROCA</b> ${qtdTextoModal}`;
         badgeStatus.style.borderColor = "#28a745";
-        
         if (waContainer) waContainer.style.display = "block";
         const numeroWhatsApp = "5511999999999"; 
         let textoQtdWa = (n.qtd > 1 && n.tipo === "MOEDAS") ? ` (Vi que você tem ${n.qtd} unidades disponíveis)` : '';
