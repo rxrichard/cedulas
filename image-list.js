@@ -394,4 +394,15 @@ const listaDeArquivosUrl = [
     "https://i.ibb.co/HDdpFjYt/100000-CRUZEIROS-A4180004789-A-FRONT.jpg",
     "https://i.ibb.co/Ngb0tNtq/10000-CRUZADOS-A0274073225-A-BACK.jpg",
 
+    "1980-1988 | https://i.ibb.co/7JysmSNB/5-KWACHA-ESTRANGEIRA-ZAMBIA-831040-BACK.jpg",
+    "1978-1988 | https://i.ibb.co/b52dXTyw/5-KWACHA-ESTRANGEIRA-ZAMBIA-831040-FRONT.jpg",
+    "1978 | https://i.ibb.co/3YG7Fjgx/100-WON-ESTRANGEIRA-COREIA-DO-NORTE-699362-BACK.jpg",
+    "1978 | https://i.ibb.co/0R7k98YB/100-WON-ESTRANGEIRA-COREIA-DO-NORTE-699362-FRONT.jpg",
+    "1978 | https://i.ibb.co/bR88dJKf/1-WON-ESTRANGEIRA-COREIA-DO-NORTE-635109-FRONT.jpg",
+    "1978 |https://i.ibb.co/ycnWZsD1/1-WON-ESTRANGEIRA-COREIA-DO-NORTE-635109-BACK.jpg",
+
+
+
+
+
 ];

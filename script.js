@@ -7,7 +7,6 @@ let filtroStatusAtual = 'TODOS';
 // ==========================================
 // IMAGEM DE SEGURANÇA (FALLBACK SE DER ERRO)
 // ==========================================
-// Uma imagem elegante nas cores do seu museu caso a foto original falhe
 const imagemErroPlaceholder = "https://placehold.co/600x300/0A2E1A/D4AF37?text=Imagem+Indisponivel";
 
 // ==========================================
@@ -130,44 +129,91 @@ function montarGaleria() {
     container.innerHTML = ''; notasGlobais = []; 
     
     if (typeof listaDeArquivosUrl === 'undefined' || listaDeArquivosUrl.length === 0) {
-        container.innerHTML = "<h3 style='color:red; text-align:center;'>Nenhuma imagem encontrada no acervo.</h3>";
+        container.innerHTML = "<h3 style='color:#D4AF37; text-align:center; margin-top: 50px;'>Nenhuma peça encontrada no acervo.</h3>";
         return;
     }
 
-    const itensProcessados = listaDeArquivosUrl.filter(item => item.includes('-FRONT')).map(item => {
-        let url = item.includes('|') ? item.split('|').pop().trim() : item.trim();
-        const filename = url.substring(url.lastIndexOf('/') + 1);
+    let arraySeguro = [];
+    if (typeof listaDeArquivosUrl === 'string') {
+        arraySeguro = [listaDeArquivosUrl];
+    } else if (Array.isArray(listaDeArquivosUrl)) {
+        arraySeguro = listaDeArquivosUrl;
+    }
+
+    let listaLimpa = [];
+    arraySeguro.forEach(linha => {
+        let blocos = String(linha).split(/(?=<a\s)/i);
+        blocos.forEach(b => {
+            if(b.trim() !== '') listaLimpa.push(b.trim());
+        });
+    });
+
+    const itensProcessados = listaLimpa.filter(item => item.includes('-FRONT')).map(item => {
+        let partes = item.split('|').map(p => p.trim()); 
+        
+        let urlFrontFinal = "";
+        let textoRestante = [];
+
+        // Inteligência nova: Separa quem é URL de quem é Comentário (ex: 1981, ACERVO)
+        partes.forEach(p => {
+            if (p.includes('http') || p.includes('<a ') || p.includes('<img')) {
+                urlFrontFinal = p;
+            } else {
+                if(p !== "") textoRestante.push(p);
+            }
+        });
+        
+        if (urlFrontFinal.includes('<img') && urlFrontFinal.includes('src=')) {
+            const match = urlFrontFinal.match(/src=["']([^"']+)["']/i);
+            if (match) urlFrontFinal = match[1];
+        }
+
+        const filename = urlFrontFinal.substring(urlFrontFinal.lastIndexOf('/') + 1);
         let baseFilename = filename.split('-FRONT')[0]; 
         let tipoItem = baseFilename.includes("-MOEDA-") ? "MOEDAS" : "CEDULAS";
         
         let statusAtual = "TROCA"; let qtd = 1; let detalheManual = "";
 
-        if (item.includes('|')) {
-            let partes = item.split('|').map(p => p.trim()); partes.pop(); 
-            let primeiraParte = partes[0].toUpperCase();
-            
-            if (primeiraParte.startsWith("ACERVO") || primeiraParte.startsWith("TROCA")) {
-                statusAtual = primeiraParte.startsWith("ACERVO") ? "ACERVO" : "TROCA";
-                if (primeiraParte.includes('-')) {
-                    let valorAposTraco = primeiraParte.split('-')[1].trim();
-                    if (tipoItem === "MOEDAS") qtd = parseInt(valorAposTraco) || 1;
-                    else detalheManual = valorAposTraco; 
+        // Lê os comentários independentemente da ordem!
+        textoRestante.forEach(p => {
+            let pUpper = p.toUpperCase();
+            if (pUpper.startsWith("ACERVO") || pUpper.startsWith("TROCA")) {
+                statusAtual = pUpper.startsWith("ACERVO") ? "ACERVO" : "TROCA";
+                if (pUpper.includes('-')) {
+                    let valorApos = pUpper.split('-')[1].trim();
+                    if (tipoItem === "MOEDAS" && !isNaN(parseInt(valorApos))) qtd = parseInt(valorApos);
+                    else { detalheManual += (detalheManual !== "" ? " / " : "") + valorApos; }
                 }
-                if (partes.length > 1) detalheManual = detalheManual !== "" ? detalheManual + " / " + partes[1] : partes[1];
-            } else { detalheManual = partes[0]; }
-        }
+            } else {
+                detalheManual += (detalheManual !== "" ? " / " : "") + p;
+            }
+        });
 
         let valor = baseFilename.split('-')[0];
         let moeda = "CRUZEIROS"; let era = "CRUZEIRO"; let chaveHistoria = ""; let isEstrang = false; let serialOriginal = baseFilename;
 
+        // ========================================================
+        // A NOVA MÁGICA INFALÍVEL PARA PAÍSES COM TRAÇO (COREIA-DO-NORTE)
+        // ========================================================
         if (baseFilename.includes("-ESTRANGEIRA-")) {
             isEstrang = true;
-            let partes = baseFilename.split('-ESTRANGEIRA-'); 
-            let partesEsq = partes[0].split('-'); moeda = partesEsq[1]; 
-            let partesDir = partes[1].split('-'); era = partesDir[0].toUpperCase().replace(/_/g, ' '); 
-            chaveHistoria = `${valor}-${moeda}-${era.replace(/ /g, '_')}`; 
-            let prefixoLimpo = `${partes[0]}-ESTRANGEIRA-${partesDir[0]}-`;
-            serialOriginal = baseFilename.replace(prefixoLimpo, '');
+            let pEstrang = baseFilename.split('-ESTRANGEIRA-'); 
+            
+            // Esquerda: Pega a moeda e substitui o traço por espaço se tiver (Ex: NOVO-PESO -> NOVO PESO)
+            let partesEsq = pEstrang[0].split('-'); 
+            moeda = partesEsq.slice(1).join(' '); 
+            
+            // Direita: Limpa a palavra MOEDA se tiver, e divide pelos traços
+            let ladoDireito = pEstrang[1].replace('-MOEDA-', '-'); 
+            let partesDir = ladoDireito.split('-'); 
+            
+            // O ÚLTIMO item depois do último traço é SEMPRE a série
+            serialOriginal = partesDir.pop(); 
+            
+            // Tudo que sobrou antes da série é o País! Junta com espaço!
+            era = partesDir.join(' ').toUpperCase(); 
+            
+            chaveHistoria = `${valor}-${moeda.replace(/ /g, '_')}-${era.replace(/ /g, '_')}`; 
             if (!serialOriginal || serialOriginal === baseFilename) serialOriginal = "S/N";
         } 
         else if (baseFilename.includes("CRUZEIROS-REAIS") || baseFilename.includes("CRUZEIRO-REAL")) {
@@ -194,14 +240,29 @@ function montarGaleria() {
             serialOriginal = baseFilename.replace(prefixoLimpo, '');
         }
 
+        // Junta a série original com as suas anotações
         if (detalheManual !== "") serialOriginal = (serialOriginal !== "" && serialOriginal !== "S/N") ? `${serialOriginal} / ${detalheManual}` : detalheManual;
 
-        let itemBackFound = listaDeArquivosUrl.find(u => u.includes(baseFilename + '-BACK'));
-        let urlBackFound = itemBackFound;
-        if (itemBackFound && itemBackFound.includes('|')) urlBackFound = itemBackFound.split('|').pop().trim();
+        let itemBackFound = listaLimpa.find(u => u.includes(baseFilename + '-BACK'));
+        let urlBackFinal = itemBackFound;
+        
+        if (itemBackFound) {
+            let partesBack = itemBackFound.split('|').map(p => p.trim());
+            let urlBackString = "";
+            partesBack.forEach(p => {
+                if (p.includes('http') || p.includes('<a ') || p.includes('<img')) urlBackString = p;
+            });
+            
+            if (urlBackString.includes('<img') && urlBackString.includes('src=')) {
+                const matchB = urlBackString.match(/src=["']([^"']+)["']/i);
+                if (matchB) urlBackFinal = matchB[1];
+            } else {
+                urlBackFinal = urlBackString;
+            }
+        }
 
         return { 
-            urlFront: url, urlBack: urlBackFound, 
+            urlFront: urlFrontFinal, urlBack: urlBackFinal, 
             valorNum: parseInt(valor), valorExibicao: numeroParaExtenso(parseInt(valor)), 
             moeda: moeda, era: era, serial: serialOriginal, chaveHistoria: chaveHistoria,
             tipo: tipoItem, status: statusAtual, isEstrang: isEstrang, qtd: qtd 
@@ -250,14 +311,13 @@ function montarGaleria() {
 
             const card = document.createElement('div'); card.className = 'note-card';
             
-            // MÁGICA AQUI: O evento onerror e loading="lazy" protegem e otimizam a imagem!
             card.innerHTML = `
                 <div class="img-wrapper">
                     <div class="stamp-overlay ${classeCarimbo}"><b>${textoCarimbo}</b></div>
                     ${badgeQtd}
                     <img src="${n.urlFront}" loading="lazy" 
-                         onerror="this.onerror=null; this.src='${imagemErroPlaceholder}'; this.style.opacity=1;" 
-                         onload="this.classList.add('loaded')">
+                         onload="this.classList.add('loaded'); this.parentElement.classList.add('is-loaded');"
+                         onerror="this.onerror=null; this.style.display='none'; this.parentElement.classList.add('is-error');">
                 </div>
                 <div class="card-info">
                     <b>${n.valorExibicao} ${n.moeda}</b>
@@ -281,16 +341,21 @@ function abrirModalInterativo(index) {
     const imgF = document.getElementById('imgFront');
     const imgB = document.getElementById('imgBack');
 
-    // Reseta as imagens e configura o escudo contra erros no Modal também
     imgF.classList.remove('loaded');
+    imgF.parentElement.classList.remove('is-loaded', 'is-error');
+    imgF.style.display = 'block';
+    
     imgF.src = n.urlFront;
-    imgF.onerror = function() { this.src = imagemErroPlaceholder; };
-    imgF.onload = function() { this.classList.add('loaded'); };
+    imgF.onload = function() { this.classList.add('loaded'); this.parentElement.classList.add('is-loaded'); };
+    imgF.onerror = function() { this.style.display='none'; this.parentElement.classList.add('is-error'); };
 
     imgB.classList.remove('loaded');
+    imgB.parentElement.classList.remove('is-loaded', 'is-error');
+    imgB.style.display = 'block';
+    
     imgB.src = n.urlBack || n.urlFront; 
-    imgB.onerror = function() { this.src = imagemErroPlaceholder; };
-    imgB.onload = function() { this.classList.add('loaded'); };
+    imgB.onload = function() { this.classList.add('loaded'); this.parentElement.classList.add('is-loaded'); };
+    imgB.onerror = function() { this.style.display='none'; this.parentElement.classList.add('is-error'); };
 
     document.getElementById('infoTitle').innerText = `${n.valorExibicao} ${n.moeda}`;
     document.getElementById('specValor').innerText = `${n.valorNum} ${n.moeda}`;
@@ -344,8 +409,17 @@ function navegar(direcao) {
 
 function toggleFlip() { document.getElementById('flipper').classList.toggle('flipped'); }
 
-function abrirSuperZoom(src) {
-    document.getElementById('zoomImg').src = src; escalaZoom = 1; 
+// ==========================================
+// CONTROLE DO SUPER ZOOM 
+// ==========================================
+function abrirSuperZoom(src_ignorado) {
+    const estaVirado = document.getElementById('flipper').classList.contains('flipped');
+    const n = notasGlobais[notaAtualIndex];
+    
+    const srcCorreto = (estaVirado && n.urlBack) ? n.urlBack : n.urlFront;
+
+    document.getElementById('zoomImg').src = srcCorreto; 
+    escalaZoom = 1; 
     document.getElementById('zoomImg').style.transform = `scale(1)`;
     document.getElementById('superZoom').classList.add('open');
 }
