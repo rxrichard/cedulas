@@ -124,5 +124,20 @@ const bancoHistorico = {
     "DEFAULT_CRUZADO": { 
         hist: "O Cruzado foi criado em 1986 como a primeira grande tentativa moderna de combater a hiperinflação através do corte sistemático de zeros das antigas cédulas.", 
         cur: "Devido à urgência das reformas monetárias, muitas cédulas foram reaproveitadas e adaptadas com carimbos oficiais, criando uma era fascinante para a numismática." 
-    }
+    },
+
+    "1-WON-COREIA_DO_NORTE": { 
+        hist: "Emitida em 1978, esta cédula de 1 Won da Coreia do Norte reflete a ideologia Juche de autossuficiência. O anverso destaca a união das classes sociais (soldado, trabalhador e camponesa) diante da arquitetura de Pyongyang.", 
+        cur: "O reverso apresenta uma cena de guerrilha, reforçando a narrativa de resistência militar que é central na cultura política do país." 
+    },
+
+    "100-WON-COREIA_DO_NORTE": { 
+        hist: "Esta é uma das notas mais emblemáticas da Coreia do Norte, estampando o rosto de Kim Il-sung, o 'Presidente Eterno'. Foi a principal unidade monetária do país durante grande parte da era da Guerra Fria.", 
+        cur: "O reverso mostra a casa natal de Kim Il-sung em Mangyongdae, um local tratado como solo sagrado e destino de peregrinação obrigatória para os cidadãos norte-coreanos." 
+    },
+
+    "5-KWACHA-ZAMBIA": { 
+        hist: "Emitida pela Zâmbia na década de 80, esta nota homenageia Kenneth Kaunda, o primeiro presidente e herói da independência do país. A moeda 'Kwacha' significa 'amanhecer' em várias línguas locais, simbolizando a liberdade.", 
+        cur: "A nota é famosa entre colecionadores pela beleza da Águia-pescadora africana no anverso e pela imponente Barragem de Kariba no reverso, uma das maiores do mundo na época." 
+    },
 };
