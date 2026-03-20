@@ -72,7 +72,7 @@ body {
     margin: 0;
     overflow-x: hidden;
     max-width: 100vw;
-    padding-top: 260px; /* espaço para o cabeçalho fixo */
+    padding-top: 240px; /* espaço para o cabeçalho fixo (inclui seletor de país) */
 
     /* Textura sutil de papel adamascado */
     background-color: var(--bg-page);
@@ -100,7 +100,7 @@ header {
     width: 100%;
     z-index: 100;
     box-sizing: border-box;
-    padding: 35px 20px 25px;
+    padding: 18px 20px 14px;
     text-align: center;
 
     background: var(--primary);
@@ -126,7 +126,7 @@ header h1 {
     color: var(--gold-light);
     text-transform: uppercase;
     letter-spacing: 2.5px;
-    margin: 0 0 10px;
+    margin: 0 0 4px;
     text-shadow: 2px 3px 6px rgba(0,0,0,0.8);
     transition: all 0.4s ease;
 }
@@ -138,7 +138,7 @@ header h1 {
     color: #E8EBE9;
     text-transform: uppercase;
     letter-spacing: 5px;
-    margin-bottom: 25px;
+    margin-bottom: 12px;
     transition: all 0.4s ease;
 }
 
@@ -210,42 +210,148 @@ header.shrink.menu-open .filters-container {
 
 
 /* ================================================================== */
-/*  4. ABAS (CÉDULAS / MOEDAS)                                         */
+/*  3b. LINHA PRINCIPAL DE NAVEGAÇÃO                                  */
 /* ================================================================== */
 
-.tabs-container {
-    display: inline-flex;
+.nav-row-main {
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px;
-    border-radius: 6px;
-    margin-bottom: 15px;
+    gap: 20px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed rgba(212,175,55,0.35);
+    flex-wrap: wrap;
 }
 
-.tab-btn {
+/* Separador vertical entre toggle e botões de país */
+.nav-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(212,175,55,0.35);
+    flex-shrink: 0;
+}
+
+/* ---- Toggle Cédulas / Moedas ---- */
+.type-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle-label {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(232,235,233,0.4);
+    letter-spacing: 0.5px;
+    transition: color 0.3s ease;
+    user-select: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.toggle-label.active { color: var(--gold-light); }
+
+.type-toggle {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    border-radius: 13px;
+    background: rgba(212,175,55,0.2);
+    border: 2px solid var(--gold-dark);
+    cursor: pointer;
+    transition: background 0.3s, border-color 0.3s;
+    flex-shrink: 0;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);
+}
+
+.type-toggle:hover { border-color: var(--gold); background: rgba(212,175,55,0.3); }
+
+.toggle-thumb {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+.type-toggle.moedas .toggle-thumb { transform: translateX(22px); }
+
+/* ---- Botões Nacionais / Estrangeiras ---- */
+.pais-btns {
+    display: flex;
+    gap: 6px;
+}
+
+.pais-btn {
     background: transparent;
-    border: 2px solid transparent;
-    border-radius: 4px;
-    padding: 12px 40px;
+    border: 2px solid rgba(212,175,55,0.35);
+    border-radius: 6px;
+    padding: 5px 16px;
     cursor: pointer;
     font-family: var(--font-body);
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 700;
-    color: #E8EBE9;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
+    color: rgba(232,235,233,0.6);
+    letter-spacing: 0.4px;
+    transition: all 0.25s ease;
+    white-space: nowrap;
 }
 
-.tab-btn:hover  { color: var(--gold-light); background: rgba(255,255,255,0.05); }
+.pais-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold-light);
+    background: rgba(212,175,55,0.1);
+}
 
-.tab-btn.active {
+.pais-btn.active {
     background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+    border-color: #fff;
     color: var(--primary);
     font-weight: 900;
-    border: 2px solid #FFF;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
 }
+
+/* ---- Dropdown de filtro de país ---- */
+.pais-filter-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.pais-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: rgba(0,0,0,0.3) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23D4AF37' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;
+    border: 2px solid rgba(212,175,55,0.5);
+    border-radius: 30px;
+    padding: 8px 32px 8px 16px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.pais-select:hover  { border-color: var(--gold); background-color: rgba(212,175,55,0.15); }
+.pais-select:focus  { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,175,55,0.2); }
+
+.pais-select option {
+    background: var(--primary);
+    color: var(--gold-light);
+    font-weight: 600;
+}
+
+
+/* ================================================================== */
+/*  4. ABAS (mantidas para compatibilidade, ocultas visualmente)      */
+/* ================================================================== */
+
+.tabs-container { display: none; } /* substituído pelo type-toggle */
 
 
 /* ================================================================== */
@@ -956,7 +1062,7 @@ header.shrink.menu-open .filters-container {
 
 /* Tablets e mobile (≤ 768px) */
 @media (max-width: 768px) {
-    body                    { padding-top: 240px; }
+    body                    { padding-top: 200px; }
     header h1               { font-size: 24px; }
     header.shrink           { padding: 10px 15px 5px; }
     header.shrink h1        { font-size: 18px; }
@@ -1029,17 +1135,26 @@ header.shrink.menu-open .filters-container {
         box-sizing: border-box;
     }
 
-    /* 4. Botões empilhados e largos (Fáceis de tocar) */
-    .tabs-container { 
-        display: flex; flex-direction: column; width: 100%; 
-        border: none; padding: 0; background: transparent; 
-        box-shadow: none; margin-bottom: 10px; 
+    /* 4. Navegação no mobile: empilha a linha principal e expande botões */
+    .nav-row-main {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
     }
-    .tab-btn { 
-        width: 100%; margin-bottom: 8px; padding: 14px; 
-        font-size: 14px; border-radius: 4px; box-sizing: border-box;
+    .nav-divider { display: none; }
+
+    .type-toggle-wrap { justify-content: center; }
+
+    .pais-btns {
+        justify-content: center;
     }
-    
+    .pais-btn {
+        flex: 1;
+        padding: 10px 8px;
+        font-size: 12px;
+        text-align: center;
+    }
+
     .filters-container { 
         display: flex; flex-direction: column; width: 100%; 
         border-top: 1px dashed rgba(212, 175, 55, 0.3); padding-top: 15px; 
@@ -1048,6 +1163,9 @@ header.shrink.menu-open .filters-container {
         width: 100%; margin-bottom: 8px; padding: 14px; 
         font-size: 13px; border-radius: 4px; box-sizing: border-box;
     }
+    .filter-btn-search { width: 100%; box-sizing: border-box; }
+    .pais-filter-wrap { width: 100%; }
+    .pais-select { width: 100%; box-sizing: border-box; }
 
     /* 5. Comportamento ao Rolar (Shrink) no Mobile */
     header.shrink { padding: 15px; }
@@ -1071,4 +1189,236 @@ header.shrink.menu-open .filters-container {
     .badge b { font-size: 13px; }
     
     .wa-button { width: 100%; box-sizing: border-box; font-size: 13px; padding: 15px; }
+}
+
+/* ================================================================== */
+/*  BOTÃO BUSCAR NA LINHA DE FILTROS                                  */
+/* ================================================================== */
+
+.filter-btn-search {
+    border-color: rgba(212,175,55,0.6);
+    letter-spacing: 0.8px;
+}
+
+.filter-btn-search:hover {
+    background: rgba(212,175,55,0.2);
+    border-color: #fff;
+    transform: translateY(-2px);
+}
+
+/* ================================================================== */
+/*  OVERLAY E PAINEL DE BUSCA                                         */
+/* ================================================================== */
+
+.search-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+}
+
+.search-overlay.open { display: block; }
+
+/* Backdrop escurecido atrás do painel */
+.search-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(2px);
+}
+
+/* Painel branco que desce do topo */
+.search-panel {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 680px;
+    background: var(--primary);
+    border-bottom: 3px solid var(--gold);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+    z-index: 501;
+    animation: slideDown 0.22s ease;
+}
+
+@keyframes slideDown {
+    from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+    to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
+}
+
+/* Campo de input */
+.search-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+}
+
+.search-icon-input {
+    font-size: 18px;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    caret-color: var(--gold);
+}
+
+.search-input::placeholder { color: rgba(232,235,233,0.4); }
+
+.search-clear {
+    background: transparent;
+    border: none;
+    color: rgba(232,235,233,0.4);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 50%;
+    transition: 0.2s;
+    flex-shrink: 0;
+    display: none;
+}
+.search-clear.visible       { display: block; }
+.search-clear:hover         { background: rgba(255,255,255,0.1); color: #fff; }
+
+/* Lista de resultados */
+.search-results {
+    max-height: 420px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold-dark) var(--primary);
+}
+
+.search-results:empty::after {
+    content: 'Digite para buscar no acervo...';
+    display: block;
+    text-align: center;
+    padding: 28px 16px;
+    color: rgba(232,235,233,0.3);
+    font-family: var(--font-body);
+    font-size: 14px;
+}
+
+/* Mensagem sem resultado */
+.search-no-result {
+    text-align: center;
+    padding: 28px 16px;
+    color: rgba(232,235,233,0.45);
+    font-family: var(--font-body);
+    font-size: 14px;
+}
+
+/* Card de sugestão */
+.search-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 18px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(212,175,55,0.08);
+    transition: background 0.15s;
+}
+
+.search-item:last-child { border-bottom: none; }
+
+.search-item:hover,
+.search-item.selected   { background: rgba(212,175,55,0.12); }
+
+/* Miniatura */
+.search-thumb {
+    width: 72px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(212,175,55,0.2);
+}
+
+/* Texto do resultado */
+.search-item-info { flex: 1; min-width: 0; }
+
+.search-item-title {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Destaque do trecho que bateu */
+.search-item-title mark {
+    background: transparent;
+    color: var(--gold);
+    font-weight: 900;
+    text-decoration: underline;
+    text-decoration-color: rgba(212,175,55,0.5);
+}
+
+.search-item-sub {
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: rgba(232,235,233,0.45);
+    margin-top: 2px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.search-item-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 8px;
+    background: rgba(212,175,55,0.15);
+    border: 1px solid rgba(212,175,55,0.3);
+    color: var(--gold);
+    white-space: nowrap;
+}
+
+/* Seta indicativa */
+.search-item-arrow {
+    color: rgba(212,175,55,0.3);
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: 0.2s;
+}
+.search-item:hover .search-item-arrow { color: var(--gold); transform: translateX(3px); }
+
+/* ------------------------------------------------------------------ */
+/* Flash de destaque no card da galeria após navegar pela busca        */
+/* ------------------------------------------------------------------ */
+@keyframes cardFlash {
+    0%   { box-shadow: 0 0 0 0 rgba(212,175,55,0); transform: scale(1); }
+    25%  { box-shadow: 0 0 0 8px rgba(212,175,55,0.7); transform: scale(1.04); }
+    70%  { box-shadow: 0 0 0 4px rgba(212,175,55,0.3); transform: scale(1.02); }
+    100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); transform: scale(1); }
+}
+
+.note-card.flash-highlight {
+    animation: cardFlash 0.9s ease forwards;
+    z-index: 10;
+    position: relative;
+}
+
+/* ------------------------------------------------------------------ */
+/* Mobile                                                               */
+/* ------------------------------------------------------------------ */
+@media (max-width: 768px) {
+    .search-panel { max-width: 100%; border-radius: 0; }
+    .search-input  { font-size: 15px; }
+    .search-thumb  { width: 56px; height: 32px; }
 }

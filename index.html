@@ -16,14 +16,44 @@
     <div class="header-subtitle">COLEÇÃO NUMISMÁTICA - RICHARD BASTOS</div>
     
     <div class="nav-menu" id="navMenu">
-        <div class="tabs-container">
-            <button class="tab-btn active" id="tab-cedulas" onclick="mudarAba('CEDULAS')">Cédulas</button>
-            <button class="tab-btn" id="tab-moedas" onclick="mudarAba('MOEDAS')">Moedas</button>
+
+        <!-- LINHA 1: Toggle Cédulas/Moedas + Botões BR/Estrangeiras -->
+        <div class="nav-row-main">
+
+            <!-- Toggle Cédulas / Moedas -->
+            <div class="type-toggle-wrap">
+                <span class="toggle-label active" id="toggle-label-cedulas">Cédulas</span>
+                <div class="type-toggle" id="typeToggle" onclick="toggleAba()" title="Alternar tipo">
+                    <div class="toggle-thumb"></div>
+                </div>
+                <span class="toggle-label" id="toggle-label-moedas">Moedas</span>
+            </div>
+
+            <!-- Separador vertical -->
+            <div class="nav-divider"></div>
+
+            <!-- Botões Nacionais / Estrangeiras -->
+            <div class="pais-btns">
+                <button class="pais-btn active" id="btn-br" onclick="mudarPais('BR')">🇧🇷 Nacionais</button>
+                <button class="pais-btn" id="btn-estrang" onclick="mudarPais('ESTRANG')">🌍 Estrangeiras</button>
+            </div>
         </div>
+
+        <!-- LINHA 2: Filtros de status + Filtro de país + Busca -->
         <div class="filters-container">
-            <button class="filter-btn active" id="filter-todos" onclick="mudarFiltro('TODOS')">Todas as Peças</button>
-            <button class="filter-btn" id="filter-troca" onclick="mudarFiltro('TROCA')">Para Troca</button>
-            <button class="filter-btn" id="filter-acervo" onclick="mudarFiltro('ACERVO')">Acervo Pessoal</button>
+            <button class="filter-btn active" id="filter-todos"  onclick="mudarFiltro('TODOS')">Todas as Peças</button>
+            <button class="filter-btn"        id="filter-troca"  onclick="mudarFiltro('TROCA')">Para Troca</button>
+            <button class="filter-btn"        id="filter-acervo" onclick="mudarFiltro('ACERVO')">Acervo Pessoal</button>
+
+            <!-- Dropdown de país — só visível em modo Estrangeiras -->
+            <div class="pais-filter-wrap" id="paisFilterWrap" style="display:none;">
+                <select class="pais-select" id="paisSelect" onchange="mudarPaisFilter(this.value)">
+                    <option value="TODOS">🌍 Todos os Países</option>
+                </select>
+            </div>
+
+            <!-- Botão Buscar — mesmo estilo dos filter-btn -->
+            <button class="filter-btn filter-btn-search" onclick="toggleBusca()" title="Buscar peça">🔍 Buscar</button>
         </div>
     </div>
 </header>
@@ -88,7 +118,24 @@
     </div>
 </div>
 
-<script src="image-list.js"></script>
+<!-- ===== PAINEL DE BUSCA ===== -->
+<div id="searchOverlay" class="search-overlay">
+    <div class="search-panel">
+        <div class="search-input-wrap">
+            <span class="search-icon-input">🔍</span>
+            <input type="text" id="searchInput" class="search-input"
+                   placeholder="Buscar por valor, moeda, série, país..."
+                   oninput="executarBusca(this.value)"
+                   autocomplete="off" spellcheck="false">
+            <button class="search-clear" id="searchClear" onclick="limparBusca()">✕</button>
+        </div>
+        <div class="search-results" id="searchResults"></div>
+    </div>
+    <div class="search-backdrop" onclick="fecharBusca()"></div>
+</div>
+
+<script src="image-list-br.js"></script>
+<script src="image-list-estrang.js"></script>
 <script src="descricoes-notas.js"></script>
 <script src="script.js"></script>
 
